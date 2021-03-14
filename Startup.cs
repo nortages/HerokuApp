@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +20,7 @@ namespace HerokuApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            object p = services.AddMvc().AddRazorRuntimeCompilation();
 
             // If using Kestrel:
             services.Configure<KestrelServerOptions>(options =>
@@ -38,7 +34,7 @@ namespace HerokuApp
                 options.AllowSynchronousIO = true;
             });
 
-            services.AddHostedService<ApplicationLifetimeHostedService>();
+            //services.AddHostedService<ApplicationLifetimeHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +45,7 @@ namespace HerokuApp
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -58,6 +54,16 @@ namespace HerokuApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "commands",
+                    pattern: "{channelName}/commands",
+                    defaults: new { controller = "Commands", action = "Index" },
+                    constraints: new { channelName = @"^[a-zA-Z0-9_]{4,25}$" }
+                );
             });
         }
     }

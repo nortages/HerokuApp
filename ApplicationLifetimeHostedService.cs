@@ -29,11 +29,11 @@ namespace HerokuApp
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("StartAsync method called.");
+            logger.LogInformation("StartAsync method called.");
 
-            this.appLifetime.ApplicationStarted.Register(OnStarted);
-            this.appLifetime.ApplicationStopping.Register(OnStopping);
-            this.appLifetime.ApplicationStopped.Register(OnStopped);
+            appLifetime.ApplicationStarted.Register(OnStarted);
+            appLifetime.ApplicationStopping.Register(OnStopping);
+            appLifetime.ApplicationStopped.Register(OnStopped);
 
             return Task.CompletedTask;
 
@@ -41,21 +41,21 @@ namespace HerokuApp
 
         private void OnStarted()
         {
-            this.logger.LogInformation("OnStarted method called.");
+            logger.LogInformation("OnStarted method called.");
 
             // Post-startup code goes here  
         }
 
         private void OnStopping()
         {
-            this.logger.LogInformation("OnStopping method called.");
+            logger.LogInformation("OnStopping method called.");
 
             // On-stopping code goes here  
         }
 
         private void OnStopped()
         {
-            this.logger.LogInformation("OnStopped method called.");
+            logger.LogInformation("OnStopped method called.");
 
             // Post-stopped code goes here  
         }
@@ -63,7 +63,7 @@ namespace HerokuApp
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("StopAsync method called.");
+            logger.LogInformation("StopAsync method called.");
 
             return Task.CompletedTask;
         }

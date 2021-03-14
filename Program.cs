@@ -1,24 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using HerokuApp.Main;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using HerokuApp;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HerokuApp
 {
-    public class Program
+    public static class Program
     {
+        public static event EventHandler OnProcessExit;
+
         public static void Main(string[] args)
         {
-            var bot = new TwitchChatBot();
-            new Task(bot.Connect).Start();
+            AppDomain.CurrentDomain.ProcessExit += (o, e) =>
+            {
+                Console.WriteLine("The app have got SIGTERM. Perform the graceful shutdown...");
+                OnProcessExit?.Invoke(o, e);
+            };
+
+            Task.Run(NortagesTwitchBot.Connect);
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var port = Environment.GetEnvironmentVariable("PORT");
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });        
+                    if (port != null)
+                    {
+                        webBuilder.UseUrls("http://*:" + port);
+                    }                    
+                });
+        }
     }
 }

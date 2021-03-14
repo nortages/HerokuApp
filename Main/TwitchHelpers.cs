@@ -1,25 +1,16 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Text.RegularExpressions;
 using TwitchLib.Api;
-using TwitchLib.Api.Core.Interfaces;
 using TwitchLib.Api.Core.Models.Undocumented.Chatters;
-using TwitchLib.Api.Core.Models.Undocumented.RecentMessages;
-using TwitchLib.Api.Helix;
-using TwitchLib.Api.Helix.Models.Entitlements.GetCodeStatus;
-using TwitchLib.Api.Helix.Models.Subscriptions;
-using TwitchLib.Api.Helix.Models.Users;
+using TwitchLib.Api.Helix.Models.ChannelPoints.UpdateCustomRewardRedemptionStatus;
+using TwitchLib.Api.Helix.Models.Users.GetUsers;
+using TwitchLib.Api.Helix.Models.Videos.GetVideos;
 using TwitchLib.Api.ThirdParty.UsernameChange;
 using TwitchLib.Api.V5.Models.Channels;
-using TwitchLib.Client;
-using TwitchLib.Client.Models;
 
-namespace HerokuApp
+namespace HerokuApp.Main
 {
     public static class TwitchHelpers
     {
@@ -29,8 +20,8 @@ namespace HerokuApp
         {
             // TwitchAPI
             twitchAPI.Settings.ClientId = Config.BotClientId;
-            twitchAPI.Settings.AccessToken = Config.BotAccessToken;
-            twitchAPI.Settings.Secret = "Twitch"; // Need to not hard code this 
+            twitchAPI.Settings.AccessToken = Config.GetTwitchAccessToken();
+            twitchAPI.Settings.Secret = "Twitch"; // Need to not hard code this
         }
 
         public static void SubscribeToStreamEvents(string url, string channelId, TimeSpan duration)
@@ -38,42 +29,25 @@ namespace HerokuApp
             twitchAPI.Helix.Webhooks.StreamUpDownAsync(url, TwitchLib.Api.Core.Enums.WebhookCallMode.Subscribe, channelId, duration);
         }
 
-        public static void RenewTwitchToken(string refreshToken, out string newAccessToken)
+        public static bool IsSubscribeToChannel(string broadcasterId, string userId, string accessToken)
         {
-            var fullUrl = $"https://twitchtokengenerator.com/api/refresh/{refreshToken}";
-            var client = new RestClient(fullUrl);
-            var request = new RestRequest();
-            var response = client.Get(request).Content;
-            var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
-            newAccessToken = responseDict["token"];
+            return twitchAPI.Helix.Subscriptions.GetUserSubscriptionsAsync(broadcasterId, new List<string> { userId }, accessToken)
+                .Result.Data.Length != 0;
         }
 
-        public static bool IsSubscribeToChannel(string broadcasterId, string userId, string accessToken = null)
+        public static bool IsUserTimedOut(string broadcasterId, string userId, string accessToken = null)
         {
-            if (accessToken == null) accessToken = twitchAPI.Settings.AccessToken;
-            var url = @"https://api.twitch.tv/helix/subscriptions";
-
-            var client = new RestClient(url);
-            var request = new RestRequest();
-            request.AddParameter("broadcaster_id", broadcasterId);
-            request.AddParameter("user_id", userId);
-            request.AddHeader("Authorization", $"Bearer {accessToken}");
-            request.AddHeader("Client-Id", Config.BotClientId);
-            var response = client.Get(request).Content;
-
-            dynamic parsedData = JObject.Parse(response);
-            JArray jArray = parsedData.data;
-            return jArray.Count != 0;
+            var result = twitchAPI.Helix.Moderation.GetBannedUsersAsync(broadcasterId, new List<string> { userId }, accessToken: accessToken).Result;
+            return result.Data.Length != 0;
         }
 
-        public static void SendMessageWithDelay(this TwitchClient client, JoinedChannel channel, string message, TimeSpan delay)
+        public static void FulFillRedemption(string broadcasterId, string rewardId, string redemptionId)
         {
-            Task.Delay(delay).ContinueWith(t => client.SendMessage(channel, message));
-        }
-
-        public static void SendMessageWithDelay(this TwitchClient client, string channel, string message, TimeSpan delay)
-        {
-            Task.Delay(delay).ContinueWith(t => client.SendMessage(channel, message));
+            var request = new UpdateCustomRewardRedemptionStatusRequest
+            {
+                Status = TwitchLib.Api.Core.Enums.CustomRewardRedemptionStatus.FULFILLED
+            };
+            twitchAPI.Helix.ChannelPoints.UpdateCustomRewardRedemptionStatus(broadcasterId, rewardId, new List<string> { redemptionId}, request);
         }
 
         public static bool GetOnlineStatus(string channelId)
@@ -81,14 +55,51 @@ namespace HerokuApp
             return twitchAPI.V5.Streams.BroadcasterOnlineAsync(channelId).Result;
         }
 
-        public static Subscription[] GetSubscribers(string channelId)
+        public static bool IsStreamUp(string channelId)
         {
-            return twitchAPI.Helix.Subscriptions.GetBroadcasterSubscriptions(channelId, Config.BotClientId).Result.Data;
+            var streams = twitchAPI.Helix.Streams.GetStreamsAsync(userIds: new List<string> { channelId }).Result.Streams;
+            return streams.Length != 0;
         }
 
-        public static TimeSpan? GetUpTime()
+        public static TimeSpan? GetLastVideoDate(string channelId)
         {
-            string userId = GetIdByUsername(Config.ChannelName);
+            var result = twitchAPI.Helix.Videos.GetVideoAsync(userId: channelId, first: 1).Result;
+            var lastVideo = result.Videos.FirstOrDefault();
+            if (lastVideo != null)
+            {
+                var durationStr = lastVideo.Duration;
+                TimeSpan duration = GetTimeSpanFromTwitchDuration(durationStr);
+                return DateTime.Now - DateTime.Parse(lastVideo.CreatedAt).Add(duration);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static TimeSpan GetTimeSpanFromTwitchDuration(string durationStr)
+        {
+            var regex = new Regex(@"(\d+h)?(\d+m)?(\d+s)?");
+            var match = regex.Match(durationStr);
+            var reversedGroups = match.Groups.Values.Reverse().ToList();
+            var values = new int[] { 0, 0, 0 };
+            for (int i = 0; i < 3; i++)
+            {
+                if (string.IsNullOrEmpty(reversedGroups[i].Value)) continue;
+                values[values.Length - 1 - i] = int.Parse(string.Join("", reversedGroups[i].Value.SkipLast(1)));
+            }
+            var duration = new TimeSpan(values[0], values[1], values[2]);
+            return duration;
+        }
+
+        public static Video[] GetRecentVideos(string channelId, int num)
+        {
+            return twitchAPI.Helix.Videos.GetVideoAsync(userId: channelId, first: num).Result.Videos;
+        }
+
+        public static TimeSpan? GetUpTime(string channelName)
+        {
+            string userId = GetIdByUsername(channelName);
 
             if (userId == null || string.IsNullOrEmpty(userId))
                 return null;
@@ -184,6 +195,12 @@ namespace HerokuApp
         public static List<ChatterFormatted> GetChatters(string channelName)
         {
             return twitchAPI.Undocumented.GetChattersAsync(channelName).Result;
+        }
+
+        public static ChatterFormatted GetRandChatter(string channelName)
+        {
+            var chatters = GetChatters(channelName);
+            return chatters[Config.rand.Next(0, chatters.Count)];
         }
     }
 }

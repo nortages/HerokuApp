@@ -5,13 +5,12 @@ using System.Net;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using HerokuApp;
 
 namespace HerokuApp.Controllers
 {
     [ApiController]
     [Route("stream")]
-    public class TwitchStreamController : ControllerBase
+    public class ChatMessagesController : ControllerBase
     {
         [HttpGet]
         [Route("channel-info")]
@@ -19,8 +18,8 @@ namespace HerokuApp.Controllers
         {
             var channelInfo = new Dictionary<string, string>
             {
-                { "ChannelName", Config.ChannelName },
-                { "ChannelId", Config.ChannelUserID }
+                { "ChannelName", "k_i_r_a" },
+                { "ChannelId", "118110732" }
             };
             var jsonString = JsonConvert.SerializeObject(channelInfo);
 
@@ -54,7 +53,7 @@ namespace HerokuApp.Controllers
             var method = context.Request.Method;
             if (method == "OPTIONS") return;
 
-            var jsonString = JsonConvert.SerializeObject(TwitchChatBot.chatMessages.TakeLast(num));
+            var jsonString = JsonConvert.SerializeObject(Main.NortagesTwitchBot.chatMessages.TakeLast(num));
             context.Response.BodyWriter.WriteAsync(new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(jsonString)));
         }
     }
