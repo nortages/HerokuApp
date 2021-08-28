@@ -1,23 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using TwitchLib.Client.Events;
-using TwitchLib.Client.Extensions;
-using TwitchLib.PubSub.Events;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TwitchBot.Main.DonationAlerts;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchBot.Main.Hearthstone;
-using TwitchLib.Client;
+using TwitchLib.Client.Events;
+using TwitchLib.Client.Extensions;
 using TwitchLib.Client.Models;
+using TwitchLib.PubSub.Events;
+
 // ReSharper disable StringLiteralTypo
 
 namespace TwitchBot.Main

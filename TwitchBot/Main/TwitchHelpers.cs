@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TwitchLib.Api;
+using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Core.Models.Undocumented.Chatters;
-using TwitchLib.Api.Helix;
 using TwitchLib.Api.Helix.Models.ChannelPoints.UpdateCustomRewardRedemptionStatus;
 using TwitchLib.Api.Helix.Models.Users.GetUsers;
 using TwitchLib.Api.Helix.Models.Videos.GetVideos;
@@ -28,7 +28,7 @@ namespace TwitchBot.Main
         
         public static void SubscribeToStreamEvents(string url, string channelId, TimeSpan duration)
         {
-            TwitchApi.Helix.Webhooks.StreamUpDownAsync(url, TwitchLib.Api.Core.Enums.WebhookCallMode.Subscribe, channelId, duration);
+            TwitchApi.Helix.Webhooks.StreamUpDownAsync(url, WebhookCallMode.Subscribe, channelId, duration);
         }
 
         public static bool IsSubscribeToChannel(string broadcasterId, string userId, string accessToken)
@@ -61,7 +61,7 @@ namespace TwitchBot.Main
         {
             var request = new UpdateCustomRewardRedemptionStatusRequest
             {
-                Status = TwitchLib.Api.Core.Enums.CustomRewardRedemptionStatus.FULFILLED
+                Status = CustomRewardRedemptionStatus.FULFILLED
             };
             TwitchApi.Helix.ChannelPoints.UpdateCustomRewardRedemptionStatus(broadcasterId, rewardId, new List<string> { redemptionId}, request);
         }

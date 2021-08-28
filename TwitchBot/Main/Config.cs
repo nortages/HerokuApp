@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,7 +32,7 @@ namespace TwitchBot.Main
             {
                 Program.OnProcessExit += (_, e) => SaveCommandsInfo();
 
-                var timer = new System.Timers.Timer(TimeSpan.FromMinutes(15).TotalMilliseconds) {AutoReset = true};
+                var timer = new Timer(TimeSpan.FromMinutes(15).TotalMilliseconds) {AutoReset = true};
                 timer.Elapsed += (e, args) => SaveCommandsInfo();
                 timer.Start(); 
             }

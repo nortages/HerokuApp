@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using TwitchBot.Main.Converters;
-using TwitchLib.Client.Events;
 using NewtonsoftJsonConverterAttribute = Newtonsoft.Json.JsonConverterAttribute;
 
 namespace TwitchBot.Main

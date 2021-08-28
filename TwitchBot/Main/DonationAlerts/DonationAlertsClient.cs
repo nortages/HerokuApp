@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using Websocket.Client;
-using WebSocketSharp;
-using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace TwitchBot.Main.DonationAlerts
 {

@@ -1,10 +1,10 @@
+using System.Web.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Web.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace TwitchBot

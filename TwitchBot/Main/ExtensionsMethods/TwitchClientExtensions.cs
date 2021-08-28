@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using TwitchLib.Client;
 using TwitchLib.Client.Extensions;
-using TwitchLib.PubSub;
 
 namespace TwitchBot.Main.ExtensionsMethods
 {
