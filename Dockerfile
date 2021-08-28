@@ -7,17 +7,17 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["HerokuApp.csproj", ""]
-RUN dotnet restore "./HerokuApp.csproj"
+COPY ["./TwitchBot/TwitchBot.csproj", ""]
+RUN dotnet restore "TwitchBot.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "HerokuApp.csproj" -c Release -o /app/build
+RUN dotnet build "./TwitchBot/TwitchBot.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "HerokuApp.csproj" -c Release -o /app/publish
+RUN dotnet publish "./TwitchBot/TwitchBot.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "HerokuApp.dll"]
-#CMD ASPNETCORE_URLS=http://*:$PORT dotnet HerokuApp.dll
+ENTRYPOINT ["dotnet", "TwitchBot.dll"]
+#CMD ASPNETCORE_URLS=http://*:$PORT dotnet TwitchBot.dll

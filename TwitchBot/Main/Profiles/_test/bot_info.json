@@ -1,0 +1,17 @@
+﻿{
+  "IsEnabled": false,
+  "Id": "segatron_lapki",
+  "ChannelName": "segatron_lapki",
+  "ChannelUserId": "466176261",
+  "HelperBotInfo": {
+    "IsEnabled": false,
+    "IsHelperBot": true,
+    "TwitchClientInfo": {
+      "IsEnabled": true
+    }
+  },
+  "UserCooldown": 5,
+  "TwitchClientInfo": {
+    "IsEnabled": true
+  }
+}

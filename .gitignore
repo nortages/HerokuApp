@@ -1,4 +1,6 @@
 config.json
+configs.json
+MainConfig.json
 
 # Created by https://www.gitignore.io/api/csharp,dotnetcore,aspnetcore,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=csharp,dotnetcore,aspnetcore,visualstudio,visualstudiocode
@@ -656,7 +658,9 @@ MigrationBackup/
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 
 # End of https://www.gitignore.io/api/csharp,dotnetcore,aspnetcore,visualstudio,visualstudiocode
-old_config.json
-credentials.json
+
+# Personal
 .env
+credentials.json
 chromedriver.exe
+json_storage_info.json

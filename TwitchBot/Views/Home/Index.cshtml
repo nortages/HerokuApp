@@ -1,0 +1,21 @@
+﻿@using TwitchBot
+@using TwitchBot.Main
+
+@{
+    ViewData["Title"] = $"Home";
+}
+
+<h2>This is a home page of @ViewData["BotUsername"]</h2>
+
+<div id="channels-block">
+    <p>Currently the bot is running on these Twitch channels:</p>
+
+    <ul>
+        @foreach (var bot in ((List<Bot>)ViewData["BotsInfo"]).Where(bot => bot.IsEnabled))
+        {
+            <li>
+                <a target="_blank" href="https://www.twitch.tv/@bot.ChannelName">@bot.ChannelName</a>
+            </li>
+        }
+    </ul>
+</div>

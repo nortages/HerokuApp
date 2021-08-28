@@ -1,0 +1,32 @@
+﻿@using TwitchBot.Main
+
+@{
+    ViewData["Title"] = $"{ViewData["ChannelName"]} - команды";
+}
+
+<h2>Команды канала <a target="_blank" href="https://www.twitch.tv/@ViewData["ChannelName"]">@ViewData["ChannelName"]</a></h2>
+
+<div id="commands-block">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Команда</th>
+                <th scope="col">Описание</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ((List<CommandInfo>)ViewData["CommandsInfo"]).Where(c => c.IsEnabled))
+            {
+                if (item.Names == null || item.Names.Count == 0)
+                {
+                    continue;
+                };
+                var description = item.Description ?? item.MultiLangAnswer["ru"];
+                <tr>
+                    <td>!@item.Names.First()</td>
+                    <td>@description</td>
+                </tr>
+                }
+            </tbody>
+    </table>
+</div>
