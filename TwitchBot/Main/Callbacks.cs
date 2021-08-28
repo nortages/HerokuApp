@@ -35,7 +35,7 @@ namespace TwitchBot.Main
         public static string GetCommandsCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
         {
             var currentOption = (OptionInfo)s;
-            var baseUrl = Config.IsDeployed ? "https://nortagesbot.herokuapp.com" : "http://localhost:5000";
+            var baseUrl = Config.IsDeployed ? "https://nortages-twitch-bot.herokuapp.com" : "http://localhost:5000";
             return string.Format(currentOption.GetMultiLangAnswer(args.Lang), baseUrl, args.Bot.ChannelName.ToLower());
         }
 
