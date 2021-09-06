@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using TwitchBot.Main.Callbacks;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchLib.Client.Extensions;
 using TwitchLib.Client.Models;
@@ -25,7 +26,7 @@ namespace TwitchBot.Main
 
         private static MethodInfo GetCallbackMethodInfo(string methodName)
         {
-            var methodInfo = typeof(Callbacks).GetMethod(methodName, BindingFlags);
+            var methodInfo = typeof(EventCallbacks).GetMethod(methodName, BindingFlags);
             if (methodInfo == null)
                 throw new ArgumentException($"Method info is not found. Method name: {methodName}");
             return methodInfo;
@@ -136,13 +137,13 @@ namespace TwitchBot.Main
 
             if (command.ChatMessage.IsModerator)
             {
-                if (args.Bot.StreamerBot?.TwitchClient == null) return;
+                if (args.ChannelBot.ChannelTwitchClient == null) return;
 
-                args.Bot.StreamerBot.TwitchClient.TimeoutModer(channel, usernameToBan, timeoutTime, reason);
+                args.ChannelBot.ChannelTwitchClient.TimeoutModer(channel, usernameToBan, timeoutTime, reason);
             }
             else
             {
-                args.Bot.TwitchClient.TimeoutUser(channel, usernameToBan, timeoutTime, reason);
+                MainBotService.BotTwitchClient.TimeoutUser(channel, usernameToBan, timeoutTime, reason);
             }
         }
     }

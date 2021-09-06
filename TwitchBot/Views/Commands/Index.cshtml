@@ -1,4 +1,4 @@
-﻿@using TwitchBot.Main
+﻿@model List<TwitchBot.Models.ChannelCommand>
 @{
     ViewData["Title"] = $"{ViewData["ChannelName"]} - команды";
 }
@@ -14,15 +14,14 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in ((List<CommandInfo>)ViewData["CommandsInfo"]).Where(c => c.IsEnabled))
+            @foreach (var item in Model)
             {
-                if (item.Names == null || item.Names.Count == 0)
-                {
-                    continue;
-                };
-                var description = item.Description ?? item.MultiLangAnswer["ru"];
+                var command = item.Command;
+                if (command.Names is not {Length: > 0}) continue;
+                
+                var description = command.Description;
                 <tr>
-                    <td>!@item.Names.First()</td>
+                    <td>!@command.Names.First()</td>
                     <td>@description</td>
                 </tr>
                 }

@@ -1,4 +1,5 @@
 using System;
+using HerokuEnvironmentVariablesConfigurator;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,27 +9,13 @@ using TwitchBot.Main;
 
 namespace TwitchBot
 {
-    public static class Program
+    public class Program
     {
-        public static Random Rand { get; } = new Random();
-        public static event EventHandler OnProcessExit;
-        private static MainTwitchBot _mainTwitchBot;
+        public static Random Rand { get; } = new();
 
         public static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.ProcessExit += (o, e) =>
-            {
-                Console.WriteLine("The app have got SIGTERM. Perform the graceful shutdown...");
-                OnProcessExit?.Invoke(o, e);
-            };
-           
             var host = CreateHostBuilder(args).Build();
-            var configuration = host.Services.GetService<IConfiguration>(); 
-            var loggerProvider = host.Services.GetService<ILoggerProvider>(); 
-
-            _mainTwitchBot = new MainTwitchBot(configuration, loggerProvider);
-            _mainTwitchBot.Connect();
-
             host.Run();
         }
 
@@ -48,6 +35,15 @@ namespace TwitchBot
                     {
                         webBuilder.UseUrls("http://*:" + port);
                     }                    
+                })
+                .ConfigureAppConfiguration((hostContext, builder) =>
+                {
+                    // Add other providers for JSON, etc.
+                
+                    if (hostContext.HostingEnvironment.IsDevelopment())
+                    {
+                        builder.AddUserSecrets<Program>();
+                    }
                 });
         }
     }

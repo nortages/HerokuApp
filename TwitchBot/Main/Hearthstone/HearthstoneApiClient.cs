@@ -6,25 +6,24 @@ using TwitchBot.Main.ExtensionsMethods;
 
 namespace TwitchBot.Main.Hearthstone
 {
-    public static class HearthstoneApiClient
+    public class HearthstoneApiClient
     {
-        private static readonly string AccessToken;
-        private static readonly List<MinionInfo> BattlegroundsMinionsInfos;
-        private static readonly RestClient ApiClient = new RestClient($"https://us.api.blizzard.com");
-        private static readonly List<AdditionalInfo> PredefinedAdditionalInfos = GetAdditionalInfos();
+        private readonly string _accessToken;
+        private List<MinionInfo> _battlegroundsMinionsInfos;
+        private readonly RestClient _apiClient = new($"https://us.api.blizzard.com");
+        private readonly List<AdditionalInfo> _predefinedAdditionalInfos;
 
-        static HearthstoneApiClient()
+        public HearthstoneApiClient(string clientId, string clientSecret)
         {
-            var clientId = (string)Config.ConfigData.SelectToken("$.battle_net.client_id");
-            var clientSecret = (string)Config.ConfigData.SelectToken("$.battle_net.client_secret");
-            AccessToken = GetAccessToken(clientId, clientSecret);
-            BattlegroundsMinionsInfos = LoadBattlegroundsMinionsInfos();
-            BattlegroundsMinionsInfos.ForEach(GetAdditionalInfo);
+            _accessToken = GetAccessToken(clientId, clientSecret);
+            LoadBattlegroundsMinionsInfos();
+            _predefinedAdditionalInfos = GetAdditionalInfos();
+            _battlegroundsMinionsInfos.ForEach(SetAdditionalInfo);
         }
 
-        private static void GetAdditionalInfo(MinionInfo minionInfo)
+        private void SetAdditionalInfo(MinionInfo minionInfo)
         {
-            var predefinedMinion = PredefinedAdditionalInfos.SingleOrDefault(n => n.Id == minionInfo.Id);
+            var predefinedMinion = _predefinedAdditionalInfos.SingleOrDefault(n => n.Id == minionInfo.Id);
             if (predefinedMinion == null) return;
             minionInfo.AdditionalInfo = predefinedMinion;
         }
@@ -42,39 +41,41 @@ namespace TwitchBot.Main.Hearthstone
             return battleNetAccessToken;
         }
 
-        private static List<MinionInfo> LoadBattlegroundsMinionsInfos()
+        private void LoadBattlegroundsMinionsInfos()
         {
             var request = new RestRequest("hearthstone/cards", Method.GET);
             request.AddQueryParameter("locale", "ru_RU");
             request.AddQueryParameter("gameMode", "battlegrounds");
             request.AddQueryParameter("tier", "1,2,3,4,5,6");
-            request.AddQueryParameter("access_token", AccessToken);
+            request.AddQueryParameter("access_token", _accessToken);
 
             var battlegroundsMinions = new List<MinionInfo>();
             int currentPage = 0, pageCount;
             do
             {
                 request.AddOrUpdateParameter("page", currentPage + 1);
-                var content = ApiClient.Execute(request).Content;
+                var content = _apiClient.Execute(request).Content;
                 var json = JObject.Parse(content);
-                var minions = json.Value<JArray>("cards").ToObject<List<MinionInfo>>();
+                var minions = json.Value<JArray>("cards")!.ToObject<List<MinionInfo>>();
                 battlegroundsMinions.AddRange(minions);
                 currentPage = json.Value<int>("page");
                 pageCount = json.Value<int>("pageCount");
             } while (currentPage < pageCount);
-            return battlegroundsMinions;
+            
+            _battlegroundsMinionsInfos = battlegroundsMinions;
         }
 
-        public static IEnumerable<MinionInfo> GetBattlegroundsMinions(
+        public IEnumerable<MinionInfo> GetBattlegroundsMinions(
             MinionType type = MinionType.None,
             MinionKeyword keyword = MinionKeyword.None,
             MinionRarity rarity = MinionRarity.None,
             int? tavern = null,
             bool notImplemented = false)
         {
-            IEnumerable<MinionInfo> minions = BattlegroundsMinionsInfos;
+            IEnumerable<MinionInfo> minions = _battlegroundsMinionsInfos;
             if (type != MinionType.None)
             {
+                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                 if (type == MinionType.Without)
                 {
                     minions = minions.Where(n => n.MinionType == type);
@@ -92,14 +93,9 @@ namespace TwitchBot.Main.Hearthstone
             }
             if (rarity != MinionRarity.None)
             {
-                if (rarity == MinionRarity.Without)
-                {
-                }
-                else
-                {
-                }
                 minions = minions.Where(n => n.Rarity == rarity);
             }
+            // ReSharper disable once InvertIf
             if (!notImplemented)
             {
                 var notImplementedIds = new List<int> { 2288, 2081, 61028, 61056, 48100, 61047, 65031, 49973, 52502, 64189 };
@@ -108,7 +104,7 @@ namespace TwitchBot.Main.Hearthstone
             return minions;
         }
 
-        private static List<AdditionalInfo> GetAdditionalInfos()
+        private List<AdditionalInfo> GetAdditionalInfos()
         {
             #region YoHoOgre
             var YoHoOgre = new AdditionalInfo();

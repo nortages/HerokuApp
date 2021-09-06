@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TwitchBot.Models;
 
 namespace TwitchBot.Main.ExtensionsMethods
 {
@@ -27,12 +28,12 @@ namespace TwitchBot.Main.ExtensionsMethods
             // Return a random item.
         }
 
-        public static OptionInfo GetRandProbableOption(this IEnumerable<OptionInfo> probableOptions)
+        public static Option GetRandProbableOption(this IEnumerable<Option> probableOptions)
         {
             return GetProbableOption(probableOptions, Program.Rand.NextDouble());
         }
         
-        public static OptionInfo GetProbableOption(this IEnumerable<OptionInfo> probableOptions, double randDouble)
+        public static Option GetProbableOption(this IEnumerable<Option> probableOptions, double randDouble)
         {
             var enabledOptions = probableOptions.Where(n => n.IsEnabled).ToArray();
             if (randDouble is > 1 or < 0)
@@ -40,7 +41,7 @@ namespace TwitchBot.Main.ExtensionsMethods
                 throw new ArgumentException("Значение должно быть между 0 и 1");
             }
 
-            OptionInfo result = null;
+            Option result = null;
             var convertedProbabilities = GetConvertedProbabilities(enabledOptions);
             for (var i = 0; i < convertedProbabilities.Count; i++)
             {
@@ -52,7 +53,7 @@ namespace TwitchBot.Main.ExtensionsMethods
             return result;
         }
         
-        private static List<double> GetConvertedProbabilities(IReadOnlyCollection<OptionInfo> probableOptions)
+        private static List<double> GetConvertedProbabilities(IReadOnlyCollection<Option> probableOptions)
         {
             // If all options don't have the probability, assigns each of them equal one.
             if (probableOptions.All(n => n.Probability == null))

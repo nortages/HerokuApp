@@ -145,7 +145,7 @@
     "commandInfo": {
       "$ref": "#/definitions/optionInfo",      
       "required": [
-        "Names",        
+        "Names",
         "IsMentionRequired"
       ],
       "properties": {

@@ -6,23 +6,26 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TwitchBot.Main;
+using TwitchBot.Models;
 
 namespace TwitchBot
 {
     public class Startup
     {
         private IConfiguration Configuration { get; }
+        private IWebHostEnvironment CurrentEnvironment{ get; } 
         
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
         
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            object p = services.AddMvc().AddRazorRuntimeCompilation();
+            services.AddMvc().AddRazorRuntimeCompilation();
 
             // If using Kestrel:
             services.Configure<KestrelServerOptions>(options =>
@@ -36,7 +39,8 @@ namespace TwitchBot
                 options.AllowSynchronousIO = true;
             });
 
-            //services.AddHostedService<ApplicationLifetimeHostedService>();
+            services.AddDbContext<NortagesTwitchBotContext>();
+            services.AddHostedService<MainBotService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

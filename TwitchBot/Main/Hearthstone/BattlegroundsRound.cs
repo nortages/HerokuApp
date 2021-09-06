@@ -75,7 +75,7 @@ namespace TwitchBot.Main.Hearthstone
 
         public Tuple<MinionInfo, MinionInfo> SummonStartMinions(Tuple<int[], int[]> chosenMinionsIds = null)
         {
-            var allMinions = HearthstoneApiClient.GetBattlegroundsMinions();
+            var allMinions = MainBotService.HearthstoneApiClient.GetBattlegroundsMinions();
             if (chosenMinionsIds != null)
             {
                 foreach (var item in chosenMinionsIds.Item1)

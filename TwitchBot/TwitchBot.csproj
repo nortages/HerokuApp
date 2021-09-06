@@ -9,11 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="fasterflect" Version="3.0.0" />
+    <PackageReference Include="HerokuEnvironmentVariablesConfigurator" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.9" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
@@ -57,10 +65,28 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Remove="Main\MainConfig_notused.json" />
+    <Content Remove="Main\json_storage_secrets.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Main\ExtensionsMethods\WebDriverExtensions.cs" />
+    <Compile Remove="Main\OptionInfo.cs" />
+    <Compile Remove="Main\CommandInfo.cs" />
+    <Compile Remove="Main\BaseCallbackInfo.cs" />
+    <Compile Remove="Main\Bot.cs" />
+    <Compile Remove="Main\HelperBotInfo.cs" />
+    <Compile Remove="Main\MainConfig.cs" />
+    <Compile Remove="Main\MessageCommandInfo.cs" />
+    <Compile Remove="Main\RewardRedemptionInfo.cs" />
+    <Compile Remove="Main\TwitchClientInfo.cs" />
+    <Compile Remove="Main\DonationAlerts\DonationAlertsInfo.cs" />
+    <Compile Remove="Main\PubSubInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Main\CommandsFiles\json-schema.json" />
+    <_ContentIncludedByDefault Remove="Main\CommandsFiles\manuls_easter_eggs.json" />
   </ItemGroup>
 
 

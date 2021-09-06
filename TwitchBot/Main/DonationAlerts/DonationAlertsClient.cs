@@ -26,14 +26,13 @@ namespace TwitchBot.Main.DonationAlerts
         public event EventHandler OnConnected;
         public event EventHandler<OnDonationAlertArgs> OnDonationAlert;
         public event EventHandler<DonationGoalUpdate> OnDonationGoalUpdateReceived;
-        
+
         public DonationAlertsClient(string accessToken)
         {
             _accessToken = accessToken;
             var userInfo = GetUserInfo(_accessToken);
             _connectionToken = userInfo.Value<string>("socket_connection_token");
             _userId = userInfo.Value<string>("id");
-
             _serializer = new JsonSerializer {DateFormatString = "yyyy-MM-ddTHH:mm:ss"};
         }
 
@@ -90,7 +89,7 @@ namespace TwitchBot.Main.DonationAlerts
             
             if (_isConnectionPending)
             {
-                _logger.Log(LogLevel.Information, $"Connection message received: {parsedData}");
+                _logger.Log(LogLevel.Information, $"Connection message received: {data}");
                 ProceedConnection(parsedData);
                 return;
             }
@@ -101,7 +100,6 @@ namespace TwitchBot.Main.DonationAlerts
             var channel = channelToken.Value<string>();
             var eventDataToken = parsedData.SelectToken("$.result.data.data");
             if (eventDataToken == null) return;
-
 
             if (channel == $"$alerts:donation_{_userId}")
             {
