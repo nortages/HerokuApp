@@ -45,7 +45,7 @@ namespace TwitchBot.Main.ExtensionsMethods
             var convertedProbabilities = GetConvertedProbabilities(enabledOptions);
             for (var i = 0; i < convertedProbabilities.Count; i++)
             {
-                if (!(convertedProbabilities[i] >= randDouble)) continue;
+                if (convertedProbabilities[i] < randDouble) continue;
                 result = enabledOptions.ElementAt(i);
                 break;
             }
@@ -55,21 +55,13 @@ namespace TwitchBot.Main.ExtensionsMethods
         
         private static List<double> GetConvertedProbabilities(IReadOnlyCollection<Option> probableOptions)
         {
-            // If all options don't have the probability, assigns each of them equal one.
-            if (probableOptions.All(n => n.Probability == null))
-            {
-                probableOptions.ToList().ForEach(n => n.Probability = 1.0 / probableOptions.Count());
-            }
+            var optionProbabilities = probableOptions.Select(o => o.Probability ?? 1.0 / probableOptions.Count);
 
             var sums = new List<double>();
-            foreach (var option in probableOptions)
+            foreach (var probability in optionProbabilities)
             {
                 var sum = sums.LastOrDefault();
-                if (option.Probability == null)
-                {
-                    throw new ArgumentException($"One of the options has null probability");
-                }
-                var newSum = sum + (double)option.Probability;
+                var newSum = sum + probability;
                 sums.Add(newSum);
             }
 
