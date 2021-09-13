@@ -318,10 +318,13 @@ namespace TwitchBot.Main
         {
             DonationAlertsClient = new DonationAlertsClient(ChannelBotInfo.DonationAlertsInfo.AccessToken);
             
-            if (ChannelBotInfo.DonationAlertsInfo.OnDonationReceivedServiceCallbackId != null)
+            if (ChannelBotInfo.DonationAlertsInfo.OnDonationReceivedServiceCallback is {IsEnabled: true} onDonationReceivedServiceCallback)
             {
-                var onDonationAlertCallback = ChannelBotInfo.DonationAlertsInfo.OnDonationReceivedServiceCallback;
-                AddHandlerToEvent<OnDonationAlertArgs>(eventHandler => DonationAlertsClient.OnDonationAlert += eventHandler, onDonationAlertCallback.CallbackId);    
+                AddHandlerToEvent<OnDonationAlertArgs>(eventHandler => DonationAlertsClient.OnDonationAlert += eventHandler, onDonationReceivedServiceCallback.CallbackId);    
+            }
+            if (ChannelBotInfo.DonationAlertsInfo.OnDonationGoalUpdateReceivedServiceCallback is {IsEnabled: true} onDonationGoalUpdateReceivedServiceCallback)
+            {
+                AddHandlerToEvent<OnDonationAlertArgs>(eventHandler => DonationAlertsClient.OnDonationAlert += eventHandler, onDonationGoalUpdateReceivedServiceCallback.CallbackId);    
             }
 
             DonationAlertsClient.ListenToDonationAlerts();
