@@ -444,8 +444,17 @@ namespace TwitchBot.Main.Callbacks
             
             var outputString = "";
             var isNickname = false;
-            foreach (var ch in inputString)
+
+            var inputStringCases = new bool[inputString.Length];
+            for (var i = 0; i < inputString.Length; i++)
             {
+                inputStringCases[i] = char.IsUpper(inputString[i]);
+            }
+            var inputStringLower = inputString.ToLower();
+            
+            for (var i = 0; i < inputStringLower.Length; i++)
+            {
+                var ch = inputStringLower[i];
                 if (ch == '@')
                 {
                     isNickname = true;
@@ -461,10 +470,10 @@ namespace TwitchBot.Main.Callbacks
                     continue;
                 }
 
-                if (latinToCyrillic.TryGetValue(ch, out var fixedChar))
-                    outputString += fixedChar;
-                else
-                    outputString += ch;
+                var charToAdd = latinToCyrillic.TryGetValue(ch, out var fixedChar) ? fixedChar : ch;
+                if (inputStringCases[i])
+                    charToAdd = char.ToUpper(charToAdd);
+                outputString += charToAdd;
             }
 
             return outputString;
