@@ -21,6 +21,51 @@ namespace TwitchBot.Main.Callbacks
     {
         private static readonly List<DuelOffer> DuelOffersPendingAcceptance = new();
         
+        private static readonly Dictionary<string, string> FrogWordToKira = new()
+        {
+            {"лягушачьем", "Кирином"},
+            {"лягушка", "Кира"},
+            {"лягушачьих", "Кириных"},
+            {"лягушкам", "Кирам"},
+            {"лягушонки", "Кирёнки"},
+            {"лягушачьи", "Кирины"},
+            {"лягушкой", "Кирой"},
+            {"лягушачья", "Кирина"},
+            {"лягушке", "Кире"},
+            {"лягушки", "Киры"},
+            {"лягушек", "Кир"},
+            {"лягушку", "Киру"},
+            {"лягушинный", "Кирин"},
+            {"лягушком", "Кириллом"},
+            {"лягушками", "Кирами"},
+                
+            {"жаб", "Кир"},
+            {"жабий", "Кирин"},
+            {"жабы", "Киры"},
+            {"жаба", "Кира"},
+            {"жабьи", "Кирины"},
+            {"жабье", "Кирино"},
+            {"жабами", "Кирами"},
+            {"жабоидные", "Кироидные"},
+            {"жабой", "Кирой"},
+            {"жабу", "Киру"},
+        };
+        
+        public static string FactCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        {
+            if (e.Command.CommandText is not "кирафакт" or "кирофакт") return null;
+            
+            var currentOption = args.Option;
+            var answer = currentOption.GetAnswerFromOptions(s, e, args);
+            
+            foreach (var frogWord in FrogWordToKira.Keys)
+            {
+                answer = answer.Replace(frogWord, FrogWordToKira[frogWord], StringComparison.OrdinalIgnoreCase);
+            }
+
+            return answer;
+        }
+        
         public static string GetCommandsCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
         {
             var currentOption = args.Option;

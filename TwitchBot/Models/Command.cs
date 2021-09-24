@@ -12,7 +12,9 @@ namespace TwitchBot.Models
     [Table("command")]
     public partial class Command
     {
-        [Key] [Column("option_id")]
+        [Key] [Column("id")]
+        public int Id { get; set; }
+        [Column("option_id")]
         public int OptionId { get; set; }
         [Required] [Column("names")]
         public string[] Names { get; set; }
