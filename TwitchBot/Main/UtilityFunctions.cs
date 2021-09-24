@@ -13,41 +13,6 @@ namespace TwitchBot.Main
 {
     public static class UtilityFunctions
     {
-        private const BindingFlags BindingFlags = System.Reflection.BindingFlags.InvokeMethod | 
-                                                  System.Reflection.BindingFlags.IgnoreCase | 
-                                                  System.Reflection.BindingFlags.Static | 
-                                                  System.Reflection.BindingFlags.Public;
-
-        public static bool IsMethodTask(string methodName)
-        {
-            var methodInfo = GetCallbackMethodInfo(methodName);
-            return methodInfo.ReturnType == typeof(Task);
-        }
-
-        private static MethodInfo GetCallbackMethodInfo(string methodName)
-        {
-            var methodInfo = typeof(EventCallbacks).GetMethod(methodName, BindingFlags);
-            if (methodInfo == null)
-                throw new ArgumentException($"Method info is not found. Method name: {methodName}");
-            return methodInfo;
-        }
-    
-        public static object CallMethodByName(Type type, string methodName, params object[] args)
-        {            
-            var methodInfo = type.GetMethod(methodName, BindingFlags);
-            return methodInfo?.Invoke(null, args);
-            // var action = (Func<>)Delegate.CreateDelegate
-            //     (typeof(Action), methodInfo);
-            // action();
-        }
-
-        public static Delegate ConvertDelegate(Delegate originalDelegate, Type targetDelegateType)
-        {
-            return Delegate.CreateDelegate(
-                targetDelegateType,
-                originalDelegate.Target,
-                originalDelegate.Method);
-        }
 
         public static string FormatTimespan(TimeSpan timespan)
         {
@@ -83,48 +48,18 @@ namespace TwitchBot.Main
 
         public static string GetWordEnding(int num, string[] endings)
         {
-            var ending = "";
-            switch (num % 10)
+            var ending = (num % 100) switch
             {
-                case 1:
-                    ending = endings[0];
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                    ending = endings[1];
-                    break;
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 0:
-                    ending = endings[2];
-                    break;
-            }
-            switch (num % 100)
-            {
-                case 11:
-                case 12:
-                case 13:
-                case 14:
-                    ending = endings[2];
-                    break;
-            }
-
+                11 or 12 or 13 or 14 => endings[2],
+                _ => (num % 10) switch
+                {
+                    1 => endings[0],
+                    2 or 3 or 4 => endings[1],
+                    5 or 6 or 7 or 8 or 9 or 0 => endings[2],
+                    _ => ""
+                }
+            };
             return ending;
-        }
-
-        public static void ls()
-        {
-            var folders = Directory.GetDirectories(Environment.CurrentDirectory);
-            var files = Directory.GetFiles(Environment.CurrentDirectory);
-            var combined = folders.Concat(files).ToArray();
-            foreach (var file in combined)
-            {
-                Console.WriteLine(file);
-            }
         }
 
         public static void TimeoutCommandUser(ChatCommand command, CallbackArgs args, TimeSpan timeoutTime, string username = null, string reason = "")
