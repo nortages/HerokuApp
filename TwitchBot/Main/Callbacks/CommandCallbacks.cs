@@ -53,17 +53,20 @@ namespace TwitchBot.Main.Callbacks
         
         public static string FactCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
         {
-            if (e.Command.CommandText is not "кирафакт" or "кирофакт") return null;
-            
             var currentOption = args.Option;
             var answer = currentOption.GetAnswerFromOptions(s, e, args);
             
+            if (e.Command.CommandText is not ("кирафакт" or "кирофакт"))
+            {
+                return answer + " OSFrog";
+            };
+
             foreach (var frogWord in FrogWordToKira.Keys)
             {
                 answer = answer.Replace(frogWord, FrogWordToKira[frogWord], StringComparison.OrdinalIgnoreCase);
             }
 
-            return answer;
+            return answer + " PETTHEkupa";
         }
         
         public static string GetCommandsCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
@@ -380,7 +383,7 @@ namespace TwitchBot.Main.Callbacks
         {
             var command = e.Command;
             var currentOption = args.Option;
-            var currentCommand = currentOption.ParentOption.Command;
+            var currentCommand = currentOption.ParentOption.Commands.First(c => c.Names.Contains(command.CommandText));
             
             Option optionInfo;
             var username = command.ChatMessage.Username;

@@ -36,7 +36,7 @@ namespace TwitchBot.Models
         public virtual CallbackInfo CallbackInfo { get; set; }
         [ForeignKey(nameof(ParentOptionId))]
         public virtual Option ParentOption { get; set; }
-        public virtual Command Command { get; set; }
+        public virtual List<Command> Commands { get; set; }
         public virtual MessageCommand MessageCommand { get; set; }
         public virtual ICollection<Option> ChildOptions { get; set; }
         public virtual ICollection<MultiLangAnswer> MultiLangAnswer { get; set; }
@@ -102,7 +102,7 @@ namespace TwitchBot.Models
             {
                 var option = ChildOptions.GetProbableOption(randDouble);
                 answer = option.GetAnswer(option, e, args);
-                if (ParentOption == null && Command != null) Command.ChannelCommand.LastOption[username] = option;
+                if (Commands is {Count: > 0}) Commands.First(c => c.Names.Contains(command.CommandText)).ChannelCommand.LastOption[username] = option;
             }
             catch (ArgumentException ex)
             {

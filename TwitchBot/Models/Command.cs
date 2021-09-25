@@ -52,6 +52,7 @@ namespace TwitchBot.Models
 
             args.IsMentionRequired = isMentionRequired;
             var answer = Option.GetAnswer(this, e, args);
+            if (answer is null) return null;
             if (args.IsMentionRequired is true) answer = $"@{e.Command.ChatMessage.DisplayName}, {answer}";
 
             const string randChatterVariable = "${random.chatter}";
