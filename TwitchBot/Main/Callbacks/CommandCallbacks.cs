@@ -78,7 +78,7 @@ namespace TwitchBot.Main.Callbacks
             return string.Format(multiLangAnswer, baseUrl, args.ChannelBotInfo.ChannelUsername.ToLower());
         }
 
-        public static async Task<string> WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
         {
             var command = e.Command;
             var currentOption = args.Option;
@@ -98,7 +98,7 @@ namespace TwitchBot.Main.Callbacks
                 return answer;
             }
             
-            var isStreamUp = await MainBotService.BotTwitchHelpers.IsStreamUp(channelId);
+            var isStreamUp = MainBotService.BotTwitchHelpers.IsStreamUp(channelId).Result;
             if (isStreamUp)
             {
                 answer = currentOption.ChildOptions.Single(n => n.Name == "stream_on").GetAnswer(s, e, args);
