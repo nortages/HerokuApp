@@ -78,7 +78,7 @@ namespace TwitchBot.Main.Callbacks
             return string.Format(multiLangAnswer, baseUrl, args.ChannelBotInfo.ChannelUsername.ToLower());
         }
 
-        public static string WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static async Task<string> WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
         {
             var command = e.Command;
             var currentOption = args.Option;
@@ -87,29 +87,37 @@ namespace TwitchBot.Main.Callbacks
             var channelBotInfo = args.ChannelBotInfo;
 
             var isThisChannel = string.Equals(channelName, args.ChannelBotInfo.ChannelUsername, MainBotService.StringComparison);
-            var channelId = isThisChannel ? channelBotInfo.ChannelUserId : MainBotService.BotTwitchHelpers.GetIdByUsername(channelName);
-            
+            var channelId = isThisChannel ?
+             channelBotInfo.ChannelUserId :
+             MainBotService.BotTwitchHelpers.GetIdByUsername(channelName);
+                        
             string answer;
-            var isStreamUp = MainBotService.BotTwitchHelpers.IsStreamUp(channelId);
+            if (channelId is null)
+            {
+                answer = currentOption.ChildOptions.Single(n => n.Name == "nickname_not_found").GetAnswer(s, e, args);
+                return answer;
+            }
+            
+            var isStreamUp = await MainBotService.BotTwitchHelpers.IsStreamUp(channelId);
             if (isStreamUp)
             {
                 answer = currentOption.ChildOptions.Single(n => n.Name == "stream_on").GetAnswer(s, e, args);
+                return answer;
+            }
+            
+            var result = MainBotService.BotTwitchHelpers.GetElapsedTimeFromLastStream(channelId);
+            if (result is not null)
+            {
+                var timespan = result.Value;
+                var timespanPart = UtilityFunctions.FormatTimespan(timespan);
+                answer = currentOption.ChildOptions.Single(n => n.Name == "waiting_for_stream").GetAnswer(s, e, args);
+                answer = string.Format(answer, channelName, timespanPart);
             }
             else
-            {
-                var result = MainBotService.BotTwitchHelpers.GetElapsedTimeFromLastStream(channelId);
-                if (result != null)
-                {
-                    var timespan = result.Value;
-                    var timespanPart = UtilityFunctions.FormatTimespan(timespan);
-                    answer = currentOption.ChildOptions.Single(n => n.Name == "waiting_for_stream").GetAnswer(s, e, args);
-                    answer = string.Format(answer, channelName, timespanPart);
-                }
-                else
-                {                    
-                    answer = currentOption.ChildOptions.Single(n => n.Name == "not_streamer").GetAnswer(s, e, args);
-                }
+            {                    
+                answer = currentOption.ChildOptions.Single(n => n.Name == "not_streamer").GetAnswer(s, e, args);
             }
+
             return answer;
         }
 

@@ -72,9 +72,10 @@ namespace TwitchBot.Main
             return TwitchApi.V5.Streams.BroadcasterOnlineAsync(channelId).Result;
         }
 
-        public bool IsStreamUp(string channelId)
+        public async Task<bool> IsStreamUp(string channelId)
         {
-            var streams = TwitchApi.Helix.Streams.GetStreamsAsync(userIds: new List<string> { channelId }).Result.Streams;
+            var response = await TwitchApi.Helix.Streams.GetStreamsAsync(userIds: new List<string> { channelId }, first: 1);
+            var streams = response.Streams;
             return streams.Length != 0;
         }
 
