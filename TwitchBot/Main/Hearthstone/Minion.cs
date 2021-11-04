@@ -7,18 +7,6 @@ namespace TwitchBot.Main.Hearthstone
 {
     public class Minion
     {
-        [JsonIgnore] public Player Player { get; private set; }
-
-        [JsonProperty] public MinionInfo Info { get; private set; }
-        public int HealthPoints { get; set; }
-        public int AttackPoints { get; set; }
-        public bool IsDead { get; private set; }
-        public bool HasReborn { get; set; }
-        public bool HasDivineShield { get; set; }
-
-        public event EventHandler OnDied;
-        public event EventHandler OnLostDivineShield;
-
         public Minion(MinionInfo battlegroundsMinionInfo, Player player)
         {
             Player = player;
@@ -30,23 +18,33 @@ namespace TwitchBot.Main.Hearthstone
             HasDivineShield = Info.HasDivineShield;
 
             if (Info.AdditionalInfo != null && Info.AdditionalInfo.OnSummoned != null)
-            {
                 Info.AdditionalInfo.OnSummoned(this, player.Board);
-            }
         }
+
+        [JsonIgnore] public Player Player { get; }
+
+        [JsonProperty] public MinionInfo Info { get; private set; }
+        public int HealthPoints { get; set; }
+        public int AttackPoints { get; set; }
+        public bool IsDead { get; private set; }
+        public bool HasReborn { get; set; }
+        public bool HasDivineShield { get; set; }
+
+        public event EventHandler OnDied;
+        public event EventHandler OnLostDivineShield;
 
         public override string ToString()
         {
             return $"{Info.Name} {AttackPoints}-{HealthPoints}";
         }
 
-        void Attack(Minion minionToAttack)
+        private void Attack(Minion minionToAttack)
         {
             Console.WriteLine($"{this} attacks {minionToAttack}");
             if (true)
             {
-
             }
+
             TakeDamage(minionToAttack.AttackPoints);
             minionToAttack.TakeDamageFromMinion(this);
         }
@@ -65,6 +63,7 @@ namespace TwitchBot.Main.Hearthstone
                 minionToAttack = enemyTauntMinions.RandomElement();
                 if (minionToAttack == null) minionToAttack = enemyMinions.RandomElement();
             }
+
             if (minionToAttack == null) return;
             Attack(minionToAttack);
         }
@@ -84,10 +83,7 @@ namespace TwitchBot.Main.Hearthstone
             }
 
             HealthPoints -= attackPoints;
-            if (HealthPoints <= 0)
-            {
-                Die();
-            }
+            if (HealthPoints <= 0) Die();
             return true;
         }
 
@@ -101,6 +97,6 @@ namespace TwitchBot.Main.Hearthstone
         {
             IsDead = true;
             OnDied?.Invoke(this, null);
-        }        
-    }        
+        }
+    }
 }

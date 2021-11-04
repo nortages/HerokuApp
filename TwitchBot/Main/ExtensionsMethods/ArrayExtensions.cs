@@ -32,14 +32,11 @@ namespace TwitchBot.Main.ExtensionsMethods
         {
             return GetProbableOption(probableOptions, Program.Rand.NextDouble());
         }
-        
+
         public static Option GetProbableOption(this IEnumerable<Option> probableOptions, double randDouble)
         {
             var enabledOptions = probableOptions.Where(n => n.IsEnabled).ToArray();
-            if (randDouble is > 1 or < 0)
-            {
-                throw new ArgumentException("Значение должно быть между 0 и 1");
-            }
+            if (randDouble is > 1 or < 0) throw new ArgumentException("Значение должно быть между 0 и 1");
 
             Option result = null;
             var convertedProbabilities = GetConvertedProbabilities(enabledOptions);
@@ -49,10 +46,11 @@ namespace TwitchBot.Main.ExtensionsMethods
                 result = enabledOptions.ElementAt(i);
                 break;
             }
+
             result ??= enabledOptions.Last();
             return result;
         }
-        
+
         private static List<double> GetConvertedProbabilities(IReadOnlyCollection<Option> probableOptions)
         {
             var optionProbabilities = probableOptions.Select(o => o.Probability ?? 1.0 / probableOptions.Count);
@@ -68,5 +66,4 @@ namespace TwitchBot.Main.ExtensionsMethods
             return sums;
         }
     }
-
 }

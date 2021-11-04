@@ -13,7 +13,8 @@ namespace TwitchBot.Main.Converters
             return false;
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+            JsonSerializer serializer)
         {
             const RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 

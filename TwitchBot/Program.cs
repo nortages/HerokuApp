@@ -1,11 +1,8 @@
 using System;
-using HerokuEnvironmentVariablesConfigurator;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TwitchBot.Main;
 
 namespace TwitchBot
 {
@@ -31,19 +28,14 @@ namespace TwitchBot
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    if (port != null)
-                    {
+                    if (port is not null)
                         webBuilder.UseUrls("http://*:" + port);
-                    }                    
                 })
                 .ConfigureAppConfiguration((hostContext, builder) =>
                 {
                     // Add other providers for JSON, etc.
-                
-                    if (hostContext.HostingEnvironment.IsDevelopment())
-                    {
-                        builder.AddUserSecrets<Program>();
-                    }
+
+                    if (hostContext.HostingEnvironment.IsDevelopment()) builder.AddUserSecrets<Program>();
                 });
         }
     }

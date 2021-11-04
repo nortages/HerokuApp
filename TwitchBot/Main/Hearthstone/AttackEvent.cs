@@ -1,4 +1,6 @@
 ﻿namespace TwitchBot.Main.Hearthstone
 {
-    public class AttackEvent : TurnEvent { }
+    public class AttackEvent : TurnEvent
+    {
+    }
 }

@@ -2,23 +2,22 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TwitchBot.Main;
-using TwitchBot.Models;
 
 namespace TwitchBot.Controllers
 {
     public class HomeController : Controller
     {
-        private NortagesTwitchBotContext _dbContext;
-        
-        public HomeController(NortagesTwitchBotContext dbContext)
+        private readonly NortagesTwitchBotDbContext _dbDbContext;
+
+        public HomeController(NortagesTwitchBotDbContext dbDbContext)
         {
-            _dbContext = dbContext;
+            _dbDbContext = dbDbContext;
         }
-        
+
         public async Task<IActionResult> Index()
         {
-            ViewData["BotUsername"] = MainBotService.BotUsername;
-            return View(await _dbContext.ChannelBots.ToListAsync());
+            ViewData["BotUsername"] = BotService.BotUsername;
+            return View(await _dbDbContext.ChannelInfos.ToListAsync());
         }
     }
 }

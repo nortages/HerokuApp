@@ -9,7 +9,6 @@ using TwitchLib.Api.Core.Models.Undocumented.Chatters;
 using TwitchLib.Api.Helix.Models.ChannelPoints.UpdateCustomRewardRedemptionStatus;
 using TwitchLib.Api.Helix.Models.Users.GetUsers;
 using TwitchLib.Api.Helix.Models.Videos.GetVideos;
-using TwitchLib.Api.Services;
 using TwitchLib.Api.ThirdParty.UsernameChange;
 using TwitchLib.Api.V5.Models.Channels;
 
@@ -17,8 +16,6 @@ namespace TwitchBot.Main
 {
     public class TwitchHelpers
     {
-        public TwitchAPI TwitchApi { get; }
-
         public TwitchHelpers(string clientId, string accessToken)
         {
             TwitchApi = new TwitchAPI();
@@ -26,7 +23,9 @@ namespace TwitchBot.Main
             TwitchApi.Settings.AccessToken = accessToken;
             TwitchApi.Settings.Secret = "Twitch"; // Need to not hard code this
         }
-        
+
+        public TwitchAPI TwitchApi { get; }
+
         public void SubscribeToStreamEvents(string url, string channelId, TimeSpan duration)
         {
             TwitchApi.Helix.Webhooks.StreamUpDownAsync(url, WebhookCallMode.Subscribe, channelId, duration);
@@ -34,7 +33,7 @@ namespace TwitchBot.Main
 
         public bool IsSubscribeToChannel(string broadcasterId, string userId)
         {
-            return TwitchApi.Helix.Subscriptions.GetUserSubscriptionsAsync(broadcasterId, new List<string> { userId })
+            return TwitchApi.Helix.Subscriptions.GetUserSubscriptionsAsync(broadcasterId, new List<string> {userId})
                 .Result.Data.Length != 0;
         }
 
@@ -42,7 +41,8 @@ namespace TwitchBot.Main
         {
             try
             {
-                var result = await TwitchApi.Helix.Moderation.GetBannedUsersAsync(broadcasterId, new List<string> { userId }, accessToken: accessToken);
+                var result = await TwitchApi.Helix.Moderation.GetBannedUsersAsync(broadcasterId,
+                    new List<string> {userId}, accessToken: accessToken);
                 return result.Data.Length != 0;
             }
             catch (Exception e)
@@ -54,7 +54,8 @@ namespace TwitchBot.Main
 
         public bool IsUserModerator(string broadcasterId, string userId, string accessToken = null)
         {
-            var result = TwitchApi.Helix.Moderation.GetModeratorsAsync(broadcasterId, new List<string> { userId }, accessToken: accessToken).Result;
+            var result = TwitchApi.Helix.Moderation
+                .GetModeratorsAsync(broadcasterId, new List<string> {userId}, accessToken: accessToken).Result;
             return result is {Data: {Length: > 0}};
         }
 
@@ -64,7 +65,8 @@ namespace TwitchBot.Main
             {
                 Status = CustomRewardRedemptionStatus.FULFILLED
             };
-            TwitchApi.Helix.ChannelPoints.UpdateCustomRewardRedemptionStatus(broadcasterId, rewardId, new List<string> { redemptionId}, request);
+            TwitchApi.Helix.ChannelPoints.UpdateCustomRewardRedemptionStatus(broadcasterId, rewardId,
+                new List<string> {redemptionId}, request);
         }
 
         public bool GetOnlineStatus(string channelId)
@@ -74,7 +76,8 @@ namespace TwitchBot.Main
 
         public async Task<bool> IsStreamUp(string channelId)
         {
-            var response = await TwitchApi.Helix.Streams.GetStreamsAsync(userIds: new List<string> { channelId }, first: 1);
+            var response =
+                await TwitchApi.Helix.Streams.GetStreamsAsync(userIds: new List<string> {channelId}, first: 1);
             var streams = response.Streams;
             return streams.Length != 0;
         }
@@ -84,11 +87,10 @@ namespace TwitchBot.Main
             var result = TwitchApi.Helix.Videos.GetVideoAsync(userId: channelId, first: 1).Result;
             var lastVideo = result.Videos.FirstOrDefault();
             if (lastVideo == null) return null;
-            
+
             var durationStr = lastVideo.Duration;
             var duration = GetTimeSpanFromTwitchDuration(durationStr);
             return DateTime.Now - DateTime.Parse(lastVideo.CreatedAt).Add(duration);
-
         }
 
         public TimeSpan GetTimeSpanFromTwitchDuration(string durationStr)
@@ -96,12 +98,13 @@ namespace TwitchBot.Main
             var regex = new Regex(@"(\d+h)?(\d+m)?(\d+s)?");
             var match = regex.Match(durationStr);
             var reversedGroups = match.Groups.Values.Reverse().ToList();
-            var values = new int[] { 0, 0, 0 };
-            for (int i = 0; i < 3; i++)
+            var values = new[] {0, 0, 0};
+            for (var i = 0; i < 3; i++)
             {
                 if (string.IsNullOrEmpty(reversedGroups[i].Value)) continue;
                 values[values.Length - 1 - i] = int.Parse(string.Join("", reversedGroups[i].Value.SkipLast(1)));
             }
+
             var duration = new TimeSpan(values[0], values[1], values[2]);
             return duration;
         }
@@ -113,7 +116,7 @@ namespace TwitchBot.Main
 
         public TimeSpan? GetUpTime(string channelName)
         {
-                var userId = GetIdByUsername(channelName);
+            var userId = GetIdByUsername(channelName);
 
             if (userId == null || string.IsNullOrEmpty(userId))
                 return null;
@@ -122,14 +125,14 @@ namespace TwitchBot.Main
 
         public string GetIdByUsername(string userName)
         {
-            var list = new List<string> { userName };
+            var list = new List<string> {userName};
             var users = TwitchApi.Helix.Users.GetUsersAsync(null, list).Result.Users;
             return users is {Length: > 0} ? users[0].Id : null;
         }
 
         public string GetUsernameById(string id)
         {
-            var list = new List<string> { id };
+            var list = new List<string> {id};
             var users = TwitchApi.Helix.Users.GetUsersAsync(list).Result.Users;
 
             if (users == null || users.Length == 0)
@@ -143,8 +146,8 @@ namespace TwitchBot.Main
             if (userName == string.Empty)
                 return null;
 
-            List<string> list = new List<string>() { userName };
-            User[] users = TwitchApi.Helix.Users.GetUsersAsync(null, list).Result.Users;
+            var list = new List<string> {userName};
+            var users = TwitchApi.Helix.Users.GetUsersAsync(null, list).Result.Users;
 
             if (users == null || users.Length == 0)
                 return null;
@@ -157,7 +160,7 @@ namespace TwitchBot.Main
             if (userNames.Count == 0)
                 return null;
 
-            User[] users = TwitchApi.Helix.Users.GetUsersAsync(null, userNames).Result.Users;
+            var users = TwitchApi.Helix.Users.GetUsersAsync(null, userNames).Result.Users;
 
             if (users == null || users.Length == 0)
                 return null;
@@ -167,11 +170,11 @@ namespace TwitchBot.Main
 
         public Channel GetChannel(string userName)
         {
-            string userId = GetIdByUsername(userName);
+            var userId = GetIdByUsername(userName);
 
             if (!string.IsNullOrEmpty(userId))
             {
-                Channel channel = TwitchApi.V5.Channels.GetChannelByIDAsync(userId).Result;
+                var channel = TwitchApi.V5.Channels.GetChannelByIDAsync(userId).Result;
                 if (channel != null)
                     return channel;
             }
@@ -187,7 +190,6 @@ namespace TwitchBot.Main
             var subs = TwitchApi.Helix.Subscriptions.GetBroadcasterSubscriptions(userId).Result;
             var userNames = subs.Data.Select(sub => sub.UserName).ToList();
             return GetUsersAsync(userNames);
-
         }
 
         public List<UsernameChangeListing> GetUsernameChangesAsync(string userName)

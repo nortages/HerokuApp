@@ -26,7 +26,7 @@ namespace TwitchBot.Controllers
             var context = ControllerContext.HttpContext;
             var query = context.Request.Query;
             var hubChallenge = query["hub.challenge"];
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.StatusCode = (int) HttpStatusCode.OK;
             context.Response.BodyWriter.WriteAsync(new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(hubChallenge)));
         }
 
@@ -40,7 +40,7 @@ namespace TwitchBot.Controllers
             var req = context.Request;
             req.EnableBuffering();
             context.Request.Body.Seek(0, SeekOrigin.Begin);
-            using StreamReader reader = new StreamReader(req.Body, leaveOpen: true);
+            using var reader = new StreamReader(req.Body, leaveOpen: true);
             var bodyStr = reader.ReadToEnd();
             Console.WriteLine(bodyStr);
         }
@@ -50,14 +50,11 @@ namespace TwitchBot.Controllers
         public void TestHiMark()
         {
             var context = ControllerContext.HttpContext;
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.StatusCode = (int) HttpStatusCode.OK;
 
             // Create the response
             var method = context.Request.Method;
-            if (method == "OPTIONS")
-            {
-                Console.WriteLine("\nGot an OPTIONS request!");
-            }
+            if (method == "OPTIONS") Console.WriteLine("\nGot an OPTIONS request!");
 
             context.Response.Headers.Add("Access-Control-Allow-Origin", "https://www.twitch.tv");
             context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");

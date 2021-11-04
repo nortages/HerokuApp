@@ -16,6 +16,6 @@ namespace TwitchBot.Main.Hearthstone
         Totem = 21,
         Pirate = 23,
         Dragon = 24,
-        All = 26,
+        All = 26
     }
 }

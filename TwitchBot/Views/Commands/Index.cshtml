@@ -1,4 +1,4 @@
-﻿@model List<TwitchBot.Models.ChannelCommand>
+﻿@model List<TwitchBot.Models.AssociativeEntities.ChannelCommand>
 @{
     ViewData["Title"] = $"{ViewData["ChannelName"]} - команды";
 }
@@ -8,23 +8,23 @@
 <div id="commands-block">
     <table class="table">
         <thead>
-            <tr>
-                <th scope="col">Команда</th>
-                <th scope="col">Описание</th>
-            </tr>
+        <tr>
+            <th scope="col">Команда</th>
+            <th scope="col">Описание</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
-            {
-                var command = item.Command;
-                if (command.Names is not {Length: > 0}) continue;
-                
-                var description = command.Description;
-                <tr>
-                    <td>!@command.Names.First()</td>
-                    <td>@description</td>
-                </tr>
-                }
-            </tbody>
+        @foreach (var item in Model)
+        {
+            var command = item.Command;
+            if (command.Names is not {Length: > 0}) continue;
+
+            var description = command.Description;
+            <tr>
+                <td>!@command.Names.First()</td>
+                <td>@description</td>
+            </tr>
+        }
+        </tbody>
     </table>
 </div>
