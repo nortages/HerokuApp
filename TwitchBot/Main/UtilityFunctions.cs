@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using TwitchBot.Main.Callbacks;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchLib.Client.Extensions;
 using TwitchLib.Client.Models;
@@ -13,40 +8,42 @@ namespace TwitchBot.Main
 {
     public static class UtilityFunctions
     {
-
         public static string FormatTimespan(TimeSpan timespan)
         {
-            var options = new (string word, string[] endings, int howMuch, string timespanAttribute, int value)[] {
-                ("", new string[] { "день", "дня", "дней" }, 24, "TotalDays", 0),
-                ("час", new string[] { "", "а", "ов" }, 60, "TotalHours", 0),
-                ("минут", new string[] { "у", "ы", "" }, 60, "TotalMinutes", 0),
-            };
             var resultParts = new List<string>();
-            for (int i = 0; i < options.Length; i++)
+
+            var days = timespan.Days;
+            if (days != 0)
             {
-                var totalValue = (int)Math.Floor((double)typeof(TimeSpan).GetProperty(options[i].timespanAttribute).GetValue(timespan));
-                for (int j = 0; j < i; j++)
-                {
-                    var valueToMult = options[j].value;
-                    for (int k = j; k < i; k++)
-                    {
-                        valueToMult *= options[k].howMuch;
-                    }
-                    totalValue -= valueToMult;
-                }
-                options[i].value = totalValue;
-                if (totalValue != 0)
-                {
-                    var completeWord = options[i].word + GetWordEnding(totalValue, options[i].endings);
-                    var part = $"{totalValue} {completeWord}";
-                    resultParts.Add(part);
-                }
+                var daysWord = "" + GetRussianWordEnding(days, new[] {"день", "дня", "дней"});
+                var daysPart = $"{days} {daysWord}";
+                resultParts.Add(daysPart);
             }
-            if (resultParts.Count > 1) resultParts.Insert(resultParts.Count - 1, "и");
+
+            var hours = timespan.Hours;
+            if (hours != 0)
+            {
+                var hourWord = "час" + GetRussianWordEnding(hours, new[] {"", "а", "ов"});
+                var hourPart = $"{hours} {hourWord}";
+                resultParts.Add(hourPart);
+            }
+
+            var minutes = timespan.Minutes;
+            if (minutes != 0)
+            {
+                var minutesWord = "минут" + GetRussianWordEnding(minutes, new[] {"у", "ы", ""});
+                var minutesPart = $"{minutes} {minutesWord}";
+                resultParts.Add(minutesPart);
+            }
+
+            // Inserts the 'и' conjunction before the last part if there is several parts.
+            if (resultParts.Count > 1)
+                resultParts.Insert(resultParts.Count - 1, "и");
+
             return string.Join(" ", resultParts);
         }
 
-        public static string GetWordEnding(int num, string[] endings)
+        public static string GetRussianWordEnding(int num, string[] endings)
         {
             var ending = (num % 100) switch
             {
@@ -62,7 +59,8 @@ namespace TwitchBot.Main
             return ending;
         }
 
-        public static void TimeoutCommandUser(ChatCommand command, CallbackArgs args, TimeSpan timeoutTime, string username = null, string reason = "")
+        public static void TimeoutCommandUser(ChatCommand command, CallbackArgs args, TimeSpan timeoutTime,
+            string username = null, string reason = "")
         {
             if (command.ChatMessage.IsBroadcaster ||
                 command.ChatMessage.IsMe) return;
