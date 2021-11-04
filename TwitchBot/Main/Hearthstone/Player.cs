@@ -5,11 +5,7 @@ namespace TwitchBot.Main.Hearthstone
 {
     public class Player
     {
-        public Board Board { get; set; }
-        public string Username { get; set; }
-        public Player Opponent { get; set; }
-
-        static readonly Queue<DeathrattleEffectArgs> deathrattleEffectsArgsPending = new Queue<DeathrattleEffectArgs>();
+        private static readonly Queue<DeathrattleEffectArgs> deathrattleEffectsArgsPending = new();
 
         public Player(string username)
         {
@@ -18,19 +14,24 @@ namespace TwitchBot.Main.Hearthstone
             Board.OnMinionDied += Board_OnMinionDied;
         }
 
+        public Board Board { get; set; }
+        public string Username { get; set; }
+        public Player Opponent { get; set; }
+
         private void Board_OnMinionDied(object sender, EventArgs e)
         {
-            var minion = (Minion)sender;
+            var minion = (Minion) sender;
             var addInfo = minion.Info.AdditionalInfo;
             if (addInfo != null && addInfo.DeathrattleEffect != null)
             {
-                var args = new DeathrattleEffectArgs()
+                var args = new DeathrattleEffectArgs
                 {
                     Player = this,
-                    Minion = minion,
+                    Minion = minion
                 };
                 deathrattleEffectsArgsPending.Enqueue(args);
             }
+
             if (minion.HasReborn)
             {
                 var rebornMinion = Board.SummonBeside(minion.Info, minion);
@@ -46,14 +47,14 @@ namespace TwitchBot.Main.Hearthstone
 
         internal void TakeTurn()
         {
-            var minionThatAttacks = Board.GetActiveMinion();            
+            var minionThatAttacks = Board.GetActiveMinion();
             minionThatAttacks.AttackRandom();
             if (!minionThatAttacks.IsDead && minionThatAttacks.Info.HasWindfury) minionThatAttacks.AttackRandom();
 
             PerformDeathrattleEffects();
             Board.RemoveDeadMinions();
             Opponent.Board.RemoveDeadMinions();
-            
+
             if (!minionThatAttacks.IsDead)
             {
                 Console.WriteLine("Increase index");
@@ -61,12 +62,10 @@ namespace TwitchBot.Main.Hearthstone
             }
         }
 
-        static void PerformDeathrattleEffects()
+        private static void PerformDeathrattleEffects()
         {
-            while(deathrattleEffectsArgsPending.TryDequeue(out var arg))
-            {
+            while (deathrattleEffectsArgsPending.TryDequeue(out var arg))
                 arg.Minion.Info?.AdditionalInfo?.DeathrattleEffect(arg.Minion, arg.Player);
-            }
         }
     }
 }

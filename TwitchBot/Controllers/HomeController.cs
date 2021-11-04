@@ -1,17 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TwitchBot.Main;
 
 namespace TwitchBot.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
-        {
-            var botsInfo = MainTwitchBot.ChannelsBots;
-            ViewData["BotsInfo"] = botsInfo;
-            ViewData["BotUsername"] = Config.BotUsername;
+        private readonly NortagesTwitchBotDbContext _dbDbContext;
 
-            return View();
+        public HomeController(NortagesTwitchBotDbContext dbDbContext)
+        {
+            _dbDbContext = dbDbContext;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            ViewData["BotUsername"] = BotService.BotUsername;
+            return View(await _dbDbContext.ChannelInfos.ToListAsync());
         }
     }
 }

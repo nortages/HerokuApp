@@ -1,33 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <UserSecretsId>91af45ce-3ce9-4d24-9dcd-6399127d89d7</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
-    <LangVersion>preview</LangVersion>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fleck" Version="1.2.0" />
-    <PackageReference Include="InputSimulator" Version="1.0.4" />
+    <PackageReference Include="fasterflect" Version="3.0.0" />
+    <PackageReference Include="HerokuEnvironmentVariablesConfigurator" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.9" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
-    <PackageReference Include="OpenQA.Selenium.Winium" Version="1.0.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
     <PackageReference Include="RestSharp" Version="106.12.0" />
-    <PackageReference Include="Selenium.Support" Version="3.141.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include="ThenInclude.EF6" Version="1.0.0.8" />
     <PackageReference Include="TwitchLib" Version="3.2.0" />
     <PackageReference Include="TwitchLib.Communication.Clients.FDGTClient" Version="1.0.0" />
     <PackageReference Include="Websocket.Client" Version="4.3.32" />
-    <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +66,52 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Remove="Main\MainConfig_notused.json" />
+    <Content Remove="Main\json_storage_secrets.json" />
+    <Content Remove="Models\Trash\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Main\ExtensionsMethods\WebDriverExtensions.cs" />
+    <Compile Remove="Main\OptionInfo.cs" />
+    <Compile Remove="Main\CommandInfo.cs" />
+    <Compile Remove="Main\BaseCallbackInfo.cs" />
+    <Compile Remove="Main\Bot.cs" />
+    <Compile Remove="Main\HelperBotInfo.cs" />
+    <Compile Remove="Main\MainConfig.cs" />
+    <Compile Remove="Main\MessageCommandInfo.cs" />
+    <Compile Remove="Main\RewardRedemptionInfo.cs" />
+    <Compile Remove="Main\TwitchClientInfo.cs" />
+    <Compile Remove="Main\DonationAlerts\DonationAlertsInfo.cs" />
+    <Compile Remove="Main\PubSubInfo.cs" />
+    <Compile Remove="Models\ServiceCallback.cs" />
+    <Compile Remove="Models\PubsubInfo.cs" />
+    <Compile Remove="Models\DonationAlertInfo.cs" />
+    <Compile Remove="Models\TwitchClientInfo.cs" />
+    <Compile Remove="Models\AssociativeEntities\MiniGameCommand.cs" />
+    <Compile Remove="Models\AssociativeEntities\MiniGameRewardRedemption.cs" />
+    <Compile Remove="Models\AssociativeEntities\MiniGameServiceEvent.cs" />
+    <Compile Remove="Models\Trash\DonationAlertInfo.cs" />
+    <Compile Remove="Models\Trash\MiniGameCommand.cs" />
+    <Compile Remove="Models\Trash\MiniGameRewardRedemption.cs" />
+    <Compile Remove="Models\Trash\MiniGameServiceEvent.cs" />
+    <Compile Remove="Models\Trash\PubsubInfo.cs" />
+    <Compile Remove="Models\Trash\ServiceCallback.cs" />
+    <Compile Remove="Models\Trash\TwitchClientInfo.cs" />
+    <Compile Remove="Models\Trash\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Main\CommandsFiles\json-schema.json" />
+    <_ContentIncludedByDefault Remove="Main\CommandsFiles\manuls_easter_eggs.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Models\Trash\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Models\Trash\**" />
   </ItemGroup>
 
 

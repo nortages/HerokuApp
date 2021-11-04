@@ -1,25 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
-using TwitchBot.Main;
-using Controller = Microsoft.AspNetCore.Mvc.Controller;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace TwitchBot.Controllers
 {
     public class CommandsController : Controller
     {
+        private readonly NortagesTwitchBotDbContext _dbDbContext;
+
+        public CommandsController(NortagesTwitchBotDbContext dbDbContext)
+        {
+            _dbDbContext = dbDbContext;
+        }
+
         public IActionResult Index(string channelName)
         {
-            var channelBotInfo = MainTwitchBot.ChannelsBots.SingleOrDefault(n => string.Equals(n.ChannelName, channelName, Config.StringComparison));
+            var channelBotInfo =
+                _dbDbContext.ChannelInfos.SingleOrDefault(n => EF.Functions.ILike(n.ChannelUsername, channelName));
             if (channelBotInfo == null) return new NotFoundResult();
-            
-            ViewData["ChannelName"] = channelName;
-            ViewData["CommandsInfo"] = channelBotInfo.Commands;
 
-            return View();
+            ViewData["ChannelName"] = channelName;
+
+            return View(channelBotInfo.ChannelCommands.Where(c => c.IsEnabled).ToList());
         }
     }
 }

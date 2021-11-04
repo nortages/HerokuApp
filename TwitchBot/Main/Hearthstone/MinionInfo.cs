@@ -10,7 +10,7 @@ namespace TwitchBot.Main.Hearthstone
 
         [JsonProperty("rarityId")] public MinionRarity Rarity { get; set; }
         [JsonProperty("minionTypeId")] public MinionType MinionType { get; set; }
-        
+
         public int Health { get; set; }
         public int Attack { get; set; }
         public string Name { get; set; }
@@ -31,13 +31,13 @@ namespace TwitchBot.Main.Hearthstone
             if (KeywordIds == null) return;
             // TODO: Can be put into json.
 
-            var tauntExceptions = new List<int> { 48100, 61028, 63623, 763, 1003, 43022, 63622, 63619, 48100 };
+            var tauntExceptions = new List<int> {48100, 61028, 63623, 763, 1003, 43022, 63622, 63619, 48100};
             HasTaunt = KeywordIds.Contains(MinionKeyword.Taunt) && !tauntExceptions.Contains(Id);
 
-            var rebornExceptions = new List<int> { };
+            var rebornExceptions = new List<int>();
             HasReborn = KeywordIds.Contains(MinionKeyword.Reborn) && !rebornExceptions.Contains(Id);
 
-            var divineShieldExceptions = new List<int> { 61072, 38740, 60629 };
+            var divineShieldExceptions = new List<int> {61072, 38740, 60629};
             HasDivineShield = KeywordIds.Contains(MinionKeyword.DivineShield) && !divineShieldExceptions.Contains(Id);
 
             HasWindfury = KeywordIds.Contains(MinionKeyword.Windfury);
@@ -52,5 +52,5 @@ namespace TwitchBot.Main.Hearthstone
         {
             public int Tier { get; set; }
         }
-    }    
+    }
 }

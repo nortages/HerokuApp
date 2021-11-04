@@ -8,18 +8,18 @@ namespace TwitchBot.Main.Hearthstone
 {
     public class Board
     {
-        [JsonIgnore] public Player Player { get; }
+        private const int MAXBOARDSIZE = 7;
 
-        [JsonProperty]
-        readonly List<Minion> minions = new List<Minion>();
-        const int MAXBOARDSIZE = 7;
+        [JsonProperty] private readonly List<Minion> minions = new();
 
-        private int indexOfMinionWhoseTurn = 0;
+        private int indexOfMinionWhoseTurn;
 
         public Board(Player player)
         {
             Player = player;
         }
+
+        [JsonIgnore] public Player Player { get; }
 
         public int IndexOfMinionWhoseTurn
         {
@@ -27,13 +27,10 @@ namespace TwitchBot.Main.Hearthstone
             set => indexOfMinionWhoseTurn = value;
         }
 
+        public Minion this[int i] => minions[i];
+
         public event EventHandler OnMinionDied;
         public event EventHandler OnMinionLostDivineShield;
-
-        public Minion this[int i]
-        {
-            get { return minions[i]; }
-        }
 
         public IReadOnlyCollection<Minion> GetMinions()
         {
@@ -69,15 +66,12 @@ namespace TwitchBot.Main.Hearthstone
 
         internal void PerformActionsBeforeStart(Player player)
         {
-            foreach (var minion in minions)
-            {
-                minion.Info.AdditionalInfo?.OnBeforeFirstTurn?.Invoke(minion, player);
-            }
+            foreach (var minion in minions) minion.Info.AdditionalInfo?.OnBeforeFirstTurn?.Invoke(minion, player);
         }
 
         private void Minion_OnDied(object sender, EventArgs e)
         {
-            var minion = (Minion)sender;
+            var minion = (Minion) sender;
             //var minionPosition = board.IndexOf(minion);
             //if (minionPosition < IndexOfMinionWhoseTurn) IndexOfMinionWhoseTurn--;
             //Remove(minion);
@@ -95,7 +89,10 @@ namespace TwitchBot.Main.Hearthstone
             minions.Remove(minion);
         }
 
-        internal void RemoveDeadMinions() => minions.RemoveAll(n => n.IsDead);
+        internal void RemoveDeadMinions()
+        {
+            minions.RemoveAll(n => n.IsDead);
+        }
 
         public Minion GetRandomMinion()
         {

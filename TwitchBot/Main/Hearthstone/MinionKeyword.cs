@@ -10,6 +10,6 @@
         Deathrattle = 12,
         Poisonous = 32,
         Overkill = 61,
-        Reborn = 78,
+        Reborn = 78
     }
 }

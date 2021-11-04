@@ -664,3 +664,4 @@ MigrationBackup/
 credentials.json
 chromedriver.exe
 json_storage_info.json
+TwitchBot/Models/Trash/

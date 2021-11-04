@@ -1,4 +1,6 @@
 ﻿namespace TwitchBot.Main.Hearthstone
 {
-    public class TakeDamageEvent : TurnEvent { }
+    public class TakeDamageEvent : TurnEvent
+    {
+    }
 }

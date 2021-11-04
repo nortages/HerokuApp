@@ -7,13 +7,11 @@ namespace TwitchBot.Main.Hearthstone
 {
     public class BattlegroundsRound
     {
-        readonly Player player1;
-        readonly Player player2;
-        readonly List<Player> players = new List<Player>();
-
-        public string Id { get; set; }
-        public List<TurnRecord> BoardStatesDuringRound2 = new List<TurnRecord>();
-        public List<Tuple<Board, Board>> BoardStatesDuringRound = new List<Tuple<Board, Board>>();
+        private readonly Player player1;
+        private readonly Player player2;
+        private readonly List<Player> players = new();
+        public List<Tuple<Board, Board>> BoardStatesDuringRound = new();
+        public List<TurnRecord> BoardStatesDuringRound2 = new();
 
         public BattlegroundsRound(string player1, string player2)
         {
@@ -24,24 +22,19 @@ namespace TwitchBot.Main.Hearthstone
             players.Add(this.player1);
             players.Add(this.player2);
 
-            for (int i = 0; i < players.Count; i++)
-            {
-                players[i].Opponent = players[Math.Abs(i - 1)];
-            }
+            for (var i = 0; i < players.Count; i++) players[i].Opponent = players[Math.Abs(i - 1)];
         }
+
+        public string Id { get; set; }
 
         public Outcome Play(int? whoseFirstTurn = null)
         {
             Console.WriteLine("\n~~~Battleground round starts!~~~");
             int indexOfPlayer;
             if (whoseFirstTurn != null)
-            {
-                indexOfPlayer = (int)whoseFirstTurn;
-            }
+                indexOfPlayer = (int) whoseFirstTurn;
             else
-            {
                 indexOfPlayer = Program.Rand.Next(0, players.Count);
-            }
             OutputFullBoard();
             var playerWhoseTurn = players[indexOfPlayer];
             var indexOfOpponent = Math.Abs(indexOfPlayer - 1);
@@ -75,7 +68,7 @@ namespace TwitchBot.Main.Hearthstone
 
         public Tuple<MinionInfo, MinionInfo> SummonStartMinions(Tuple<int[], int[]> chosenMinionsIds = null)
         {
-            var allMinions = HearthstoneApiClient.GetBattlegroundsMinions();
+            var allMinions = BotService.HearthstoneApiClient.GetBattlegroundsMinions();
             if (chosenMinionsIds != null)
             {
                 foreach (var item in chosenMinionsIds.Item1)
@@ -84,6 +77,7 @@ namespace TwitchBot.Main.Hearthstone
                     if (minion == null) return null;
                     player1.Board.StartSummon(minion);
                 }
+
                 foreach (var item in chosenMinionsIds.Item2)
                 {
                     var minion = allMinions.SingleOrDefault(n => n.Id == item);
@@ -99,10 +93,11 @@ namespace TwitchBot.Main.Hearthstone
                     player.Board.StartSummon(newMinion);
                 }
             }
+
             return new Tuple<MinionInfo, MinionInfo>(player1.Board[0].Info, player2.Board[0].Info);
         }
 
-        void SwapPlayers(ref Player player1, ref Player player2)
+        private void SwapPlayers(ref Player player1, ref Player player2)
         {
             var temp = player1;
             player1 = player2;

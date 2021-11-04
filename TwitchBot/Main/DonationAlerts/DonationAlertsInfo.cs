@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
-using TwitchBot.Main.Converters;
 using NewtonsoftJsonConverterAttribute = Newtonsoft.Json.JsonConverterAttribute;
 
 namespace TwitchBot.Main.DonationAlerts
