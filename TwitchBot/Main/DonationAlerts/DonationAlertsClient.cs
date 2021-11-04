@@ -12,39 +12,32 @@ namespace TwitchBot.Main.DonationAlerts
     public class DonationAlertsClient
     {
         private const string DonAlertsWebSocketUri = "wss://centrifugo.donationalerts.com/connection/websocket";
-        
         private readonly string _accessToken;
-        private readonly string _connectionToken;
-        private readonly string _userId;
-        private WebsocketClient _webSocket;
-        private static ILogger _logger;
-        private bool _isConnectionPending;
-        private int _connectedChannelsNum;
-        private readonly JsonSerializer _serializer;
         private readonly List<string> _channelsToConnect = new();
+        private readonly string _connectionToken;
 
-        public event EventHandler OnConnected;
-        public event EventHandler<OnDonationAlertArgs> OnDonationAlert;
-        public event EventHandler<DonationGoalUpdate> OnDonationGoalUpdateReceived;
+        private readonly ILogger _logger;
+        private readonly JsonSerializer _serializer;
+        private readonly string _userId;
+        private readonly string _channelUsername;
+        private int _connectedChannelsNum;
+        private bool _isConnectionPending;
+        private WebsocketClient _webSocket;
 
-        public DonationAlertsClient(string accessToken)
+        public DonationAlertsClient(string accessToken, string channelUsername, ILogger logger)
         {
+            _logger = logger;
             _accessToken = accessToken;
+            _channelUsername = channelUsername;
             var userInfo = GetUserInfo(_accessToken);
             _connectionToken = userInfo.Value<string>("socket_connection_token");
             _userId = userInfo.Value<string>("id");
             _serializer = new JsonSerializer {DateFormatString = "yyyy-MM-ddTHH:mm:ss"};
         }
 
-        public static void SetLogger(ILogger logger)
-        {
-            _logger = logger;
-        }
-
-        private void Log(LogLevel level, string message)
-        {
-            _logger.Log(level,"[{Name}] {Message}", GetType().Name, message);
-        }
+        public event EventHandler OnConnected;
+        public event EventHandler<OnDonationAlertArgs> OnDonationAlert;
+        public event EventHandler<OnDonationGoalUpdateArgs> OnDonationGoalUpdateReceived;
 
         public void Connect()
         {
@@ -55,24 +48,21 @@ namespace TwitchBot.Main.DonationAlerts
                 ErrorReconnectTimeout = TimeSpan.FromSeconds(30)
             };
 
-            _webSocket.MessageReceived.Subscribe(msg =>
-            {
-                WebSocketOnMessage(msg.Text);
-            });
+            _webSocket.MessageReceived.Subscribe(msg => { WebSocketOnMessage(msg.Text); });
 
             _webSocket.ReconnectionHappened.Subscribe(info =>
             {
-                _logger.Log(LogLevel.Information, $"Reconnection happened, type: {info.Type}");
+                _logger.Log(LogLevel.Information, "Reconnection happened, type: {Type}", info.Type);
                 WebSocketOnOpen(null, null);
             });
-            
+
             _webSocket.DisconnectionHappened.Subscribe(info =>
             {
-                _logger.Log(LogLevel.Information, $"Disconnection happened, type: {info.Type}");
+                _logger.Log(LogLevel.Information, "Disconnection happened, type: {Type}", info.Type);
             });
-            
-            OnConnected += (_, _) => Log(LogLevel.Information, "Successfully connected to websocket");
-            
+
+            OnConnected += (_, _) => _logger.Log(LogLevel.Information, "Successfully connected to websocket");
+
             _webSocket.Start();
         }
 
@@ -86,10 +76,10 @@ namespace TwitchBot.Main.DonationAlerts
         private void WebSocketOnMessage(string data)
         {
             var parsedData = JObject.Parse(data);
-            
+
             if (_isConnectionPending)
             {
-                _logger.Log(LogLevel.Information, $"Connection message received: {data}");
+                _logger.Log(LogLevel.Information, "Connection message received: {Data}", data.TrimEnd());
                 ProceedConnection(parsedData);
                 return;
             }
@@ -104,11 +94,13 @@ namespace TwitchBot.Main.DonationAlerts
             if (channel == $"$alerts:donation_{_userId}")
             {
                 var donObject = eventDataToken.ToObject<OnDonationAlertArgs>(_serializer);
+                donObject!.ChannelUsername = _channelUsername;
                 OnDonationAlert?.Invoke(this, donObject);
             }
             else if (channel == $"$goals:goal_{_userId}")
             {
-                var donObject = eventDataToken.ToObject<DonationGoalUpdate>(_serializer);
+                var donObject = eventDataToken.ToObject<OnDonationGoalUpdateArgs>(_serializer);
+                donObject!.ChannelUsername = _channelUsername;
                 OnDonationGoalUpdateReceived?.Invoke(this, donObject);
             }
         }
@@ -121,10 +113,10 @@ namespace TwitchBot.Main.DonationAlerts
                 ConnectionStepTwo(clientId.Value<string>());
                 return;
             }
-            
+
             var client = data.SelectToken("$.result.data.info.client");
             if (client == null) return;
-            
+
             _connectedChannelsNum++;
             if (_connectedChannelsNum != _channelsToConnect.Count) return;
 
@@ -145,9 +137,10 @@ namespace TwitchBot.Main.DonationAlerts
 
         private string ConnectionStepOne()
         {
-            var firstJson = new JObject {
-                { "params", new JObject { { "token", _connectionToken } } },
-                { "id", 1 }
+            var firstJson = new JObject
+            {
+                {"params", new JObject {{"token", _connectionToken}}},
+                {"id", 1}
             };
             var jsonString = JsonConvert.SerializeObject(firstJson);
             return jsonString;
@@ -159,31 +152,37 @@ namespace TwitchBot.Main.DonationAlerts
             var request = new RestRequest();
             request.AddHeader("Authorization", $"Bearer {_accessToken}");
             request.AddHeader("Content-Type", "application/json");
-            var jsonBody = new JObject {
-                { "channels", JArray.FromObject(_channelsToConnect) },
-                { "client", clientId }
+            var jsonBody = new JObject
+            {
+                {"channels", JArray.FromObject(_channelsToConnect)},
+                {"client", clientId}
             };
             request.AddJsonBody(JsonConvert.SerializeObject(jsonBody));
             var content = client.Execute(request, Method.POST).Content;
             var requestAnswer = JObject.Parse(content);
-            
+
             var channelsInfo = requestAnswer.Value<JArray>("channels");
             if (channelsInfo == null)
-                throw new NullReferenceException($"[{nameof(DonationAlertsClient)}] [{MethodBase.GetCurrentMethod()?.Name}] Channels array is null.");
-            
+                throw new NullReferenceException(
+                    $"[{nameof(DonationAlertsClient)}] [{MethodBase.GetCurrentMethod()?.Name}] Channels array is null.");
+
             foreach (var channelInfo in channelsInfo)
             {
                 var channelName = channelInfo.Value<string>("channel");
                 var connectionToken = channelInfo.Value<string>("token");
-                var secondJson = new JObject {
-                    { "params", new JObject {
-                        { "channel", channelName },
-                        { "token", connectionToken }
-                    }},
-                    { "method", 1 },
-                    { "id", 2 }
+                var secondJson = new JObject
+                {
+                    {
+                        "params", new JObject
+                        {
+                            {"channel", channelName},
+                            {"token", connectionToken}
+                        }
+                    },
+                    {"method", 1},
+                    {"id", 2}
                 };
-                var dataToSend = JsonConvert.SerializeObject(secondJson); 
+                var dataToSend = JsonConvert.SerializeObject(secondJson);
                 _webSocket.Send(dataToSend);
             }
         }

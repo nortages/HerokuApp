@@ -76,7 +76,7 @@ namespace TwitchBot.Main
             }
             else
             {
-                MainBotService.BotTwitchClient.TimeoutUser(channel, usernameToBan, timeoutTime, reason);
+                BotService.BotTwitchClient.TimeoutUser(channel, usernameToBan, timeoutTime, reason);
             }
         }
     }
