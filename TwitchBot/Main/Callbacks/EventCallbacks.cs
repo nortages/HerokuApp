@@ -184,9 +184,19 @@ namespace TwitchBot.Main.Callbacks
                     callMethodTarget = miniGameInstance;
                 }
 
-                args.CallMethodTarget = callMethodTarget;
-                args.UserChannelCommand = userChannelCommand;
-                answer = command.GetAnswer(e, args);
+                var commandCallbackArgs = new CommandCallbackArgs
+                {
+                    Logger = args.Logger,
+                    ChannelBot = args.ChannelBot,
+                    ChannelInfo = args.ChannelInfo,
+                    DbContext = args.DbContext,
+                    
+                    CallMethodTarget = callMethodTarget, 
+                    UserChannelCommand = userChannelCommand,
+                    Command = command,
+                };
+                
+                answer = command.GetAnswer(e, commandCallbackArgs);
                 
                 userChannelCommand.LastUsage = DateTime.Now;
                 userChannelCommand.Amount++;
@@ -227,7 +237,17 @@ namespace TwitchBot.Main.Callbacks
                 {IsEnabled: true, MessageCommand: {Option: {IsEnabled: true}} messageCommand})
                 return;
 
-            var answer = messageCommand.GetAnswer(e, args);
+            var messageCommandCallbackArgs = new MessageCommandCallbackArgs
+            {
+                Logger = args.Logger,
+                ChannelBot = args.ChannelBot,
+                ChannelInfo = args.ChannelInfo,
+                DbContext = args.DbContext,
+                
+                MessageCommand = messageCommand,
+            };
+            
+            var answer = messageCommand.GetAnswer(e, messageCommandCallbackArgs);
             if (string.IsNullOrEmpty(answer)) return;
 
             if (messageCommand.Option.IsMentionRequired is true)

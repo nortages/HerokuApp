@@ -18,7 +18,7 @@ namespace TwitchBot.Main.Callbacks
 {
     public class CommandCallbacks
     {
-        public static string FactCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string FactCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var currentOption = args.Option;
             var answer = currentOption.GetAnswerFromOptions(s, e, args);
@@ -28,13 +28,13 @@ namespace TwitchBot.Main.Callbacks
 
             var frogWordToKira =
                 JsonConvert.DeserializeObject<Dictionary<string, string>>(currentOption.AdditionalData);
-            foreach (var frogWord in frogWordToKira.Keys)
+            foreach (var frogWord in frogWordToKira!.Keys)
                 answer = answer.Replace(frogWord, frogWordToKira[frogWord], StringComparison.OrdinalIgnoreCase);
 
             return answer + " PETTHEkupa";
         }
 
-        public static string GetCommandsCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string GetCommandsCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var currentOption = args.Option;
             var baseUrl = BotService.CurrentEnvironment.IsProduction()
@@ -45,7 +45,7 @@ namespace TwitchBot.Main.Callbacks
             return string.Format(multiLangAnswer, baseUrl, args.ChannelInfo.ChannelUsername.ToLower());
         }
 
-        public static string WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string WaitingStreamCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var command = e.Command;
             var currentOption = args.Option;
@@ -91,7 +91,7 @@ namespace TwitchBot.Main.Callbacks
             return answer;
         }
 
-        public static string BoatCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string BoatCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var command = e.Command;
             var answer = "";
@@ -156,7 +156,7 @@ namespace TwitchBot.Main.Callbacks
             return $"YEP {answer} YEP , {assessment}";
         }
 
-        public static string RadishTiredOptionCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string RadishTiredOptionCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var command = e.Command;
             var currentOption = args.Option;
@@ -184,7 +184,7 @@ namespace TwitchBot.Main.Callbacks
             return answer;
         }
  
-        public static string RadishTransformsOptionCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string RadishTransformsOptionCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var command = e.Command;
             var currentOption = args.Option;
@@ -210,7 +210,7 @@ namespace TwitchBot.Main.Callbacks
             return answer;
         }
 
-        public static string RadishDetonatorOptionCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string RadishDetonatorOptionCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var chatCommand = e.Command;
             var currentOption = args.Option;
@@ -237,7 +237,7 @@ namespace TwitchBot.Main.Callbacks
             return answer;
         }
 
-        public static string CardCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string CardCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var chatCommand = e.Command;
             var currentOption = args.Option;
@@ -263,7 +263,7 @@ namespace TwitchBot.Main.Callbacks
             return cardDescription;
         }
 
-        public static string ManulCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string ManulCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var multiLangAnswer = args.Option.MultiLangAnswer.SingleOrDefault(a => a.Lang == Lang.ru);
             var manulsNum = int.Parse(multiLangAnswer.Text);
@@ -278,7 +278,7 @@ namespace TwitchBot.Main.Callbacks
         }
 
         // Translates gibberish written in Russian in English layout into Russian layout.
-        public static string FixCommandCallback(object s, OnChatCommandReceivedArgs e, CallbackArgs args)
+        public static string FixCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var inputString = e.Command.ArgumentsAsString;
             var outputString = "";
@@ -317,13 +317,13 @@ namespace TwitchBot.Main.Callbacks
         }
 
         public static void ToggleUkrainianStreamCommandCallback(object s, OnChatCommandReceivedArgs e,
-            CallbackArgs args)
+            CommandCallbackArgs args)
         {
             args.ChannelInfo.Lang = Lang.ua;
         }
 
         public static void ToggleTestModePrivateCommandCallback(object s, OnWhisperCommandReceivedArgs e,
-            CallbackArgs args)
+            CommandCallbackArgs args)
         {
             var channelBotInfo = args.DbContext.ChannelInfos.SingleOrDefault(c =>
                 EF.Functions.ILike(c.ChannelUsername, e.Command.ArgumentsAsString));
@@ -333,7 +333,7 @@ namespace TwitchBot.Main.Callbacks
             channelBotInfo.IsTestMode = !channelBotInfo.IsTestMode;
         }
 
-        public static void ChangeLangPrivateCommandCallback(object s, OnWhisperCommandReceivedArgs e, CallbackArgs args)
+        public static void ChangeLangPrivateCommandCallback(object s, OnWhisperCommandReceivedArgs e, CommandCallbackArgs args)
         {
             var commandArgs = e.Command.ArgumentsAsList;
             var channelBotInfo = args.DbContext.ChannelInfos.SingleOrDefault(c =>
@@ -344,7 +344,7 @@ namespace TwitchBot.Main.Callbacks
             channelBotInfo.Lang = Enum.TryParse<Lang>(commandArgs[0], out var result) ? result : Lang.ru;
         }
         
-        public static void RefreshChannelInfosPrivateCommandCallback(object s, OnWhisperCommandReceivedArgs e, CallbackArgs args)
+        public static void RefreshChannelInfosPrivateCommandCallback(object s, OnWhisperCommandReceivedArgs e, CommandCallbackArgs args)
         {
             args.ChannelBot.ChannelInfo = BotService.LoadChannelInfos(args.DbContext, args.ChannelBot.ChannelInfo.Id).GetAwaiter().GetResult().Single();
             args.Logger.LogInformation("ChannelInfo was refreshed");

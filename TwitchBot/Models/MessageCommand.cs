@@ -28,7 +28,7 @@ namespace TwitchBot.Models
     {
         public string GetAnswer(
             OnMessageReceivedArgs e,
-            CallbackArgs args)
+            MessageCommandCallbackArgs args)
         {
             var channelBot = args.ChannelBot;
             var isMentionRequired = Option.IsMentionRequired;

@@ -51,7 +51,7 @@ namespace TwitchBot.Models
     public partial class Command
     {
         public string GetAnswer(OnChatCommandReceivedArgs e,
-            CallbackArgs args)
+            CommandCallbackArgs args)
         {
             var channelBot = args.ChannelBot;
             var channelBotInfo = args.ChannelInfo;

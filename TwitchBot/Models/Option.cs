@@ -55,17 +55,7 @@ namespace TwitchBot.Models
     {
         [NotMapped] public Dictionary<string, int> UsageFrequency { get; } = new();
 
-        private Command GetCommand(EventArgs e)
-        {
-            var chatCommand = (e as OnChatCommandReceivedArgs)?.Command;
-            if (chatCommand is null)
-                return null;
-
-            var command = Commands.Single(c => c.Names.Contains(chatCommand.CommandText));
-            return command;
-        }
-
-        public string GetAnswer(object o, EventArgs e, CallbackArgs args)
+        public string GetAnswer(object o, EventArgs e, OptionCallbackArgs args)
         {
             var answer = "";
 
@@ -92,14 +82,14 @@ namespace TwitchBot.Models
             return answer;
         }
 
-        public string GetMultiLangAnswer(CallbackArgs args)
+        public string GetMultiLangAnswer(OptionCallbackArgs args)
         {
             var answer = MultiLangAnswer.SingleOrDefault(a => a.Lang == args.ChannelInfo.Lang) ??
                          MultiLangAnswer.SingleOrDefault(a => a.Lang == Lang.ru);
             return answer!.Text;
         }
 
-        public string GetAnswerFromOptions(object o, EventArgs e, CallbackArgs args)
+        public string GetAnswerFromOptions(object o, EventArgs e, OptionCallbackArgs args)
         {
             var chatCommand = (e as OnChatCommandReceivedArgs)?.Command;
             var username = chatCommand!.ChatMessage.Username;
@@ -117,7 +107,8 @@ namespace TwitchBot.Models
             {
                 var option = ChildOptions.GetProbableOption(randDouble);
                 answer = option.GetAnswer(option, e, args);
-                args.UserChannelCommand.LastOptionId = option.Id;
+                if (args is CommandCallbackArgs commandCallbackArgs)
+                    commandCallbackArgs.UserChannelCommand.LastOptionId = option.Id;
             }
             catch (ArgumentException ex)
             {

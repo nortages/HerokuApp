@@ -10,11 +10,23 @@ namespace TwitchBot.Main
         public ChannelBot ChannelBot { get; set; }
         public ChannelInfo ChannelInfo { get; set; }
         public NortagesTwitchBotDbContext DbContext { get; set; }
-        
+    }
+    
+    public class OptionCallbackArgs : CallbackArgs
+    {
         public Option Option { get; set; }
-        public Command Command { get; set; }
-        public UserChannelCommand UserChannelCommand { get; set; }
         public bool? IsMentionRequired { get; set; }
         public object CallMethodTarget { get; set; }
+    }
+    
+    public class CommandCallbackArgs : OptionCallbackArgs
+    {
+        public Command Command { get; set; }
+        public UserChannelCommand UserChannelCommand { get; set; }
+    }
+    
+    public class MessageCommandCallbackArgs : OptionCallbackArgs
+    {
+        public MessageCommand MessageCommand { get; set; }
     }
 }
