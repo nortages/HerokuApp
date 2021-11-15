@@ -39,6 +39,7 @@ namespace TwitchBot
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserChannelCommand> UserChannelCommands { get; set; }
         public virtual DbSet<ChannelCommand> ChannelCommands { get; set; }
+        public virtual DbSet<MultiLangAnswer> MultiLangAnswers { get; set; }
 
         private static string FormatConnectionString(string connectionString)
         {

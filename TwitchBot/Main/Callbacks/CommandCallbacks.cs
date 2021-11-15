@@ -265,10 +265,12 @@ namespace TwitchBot.Main.Callbacks
 
         public static string ManulCommandCallback(object s, OnChatCommandReceivedArgs e, CommandCallbackArgs args)
         {
-            var multiLangAnswer = args.Option.MultiLangAnswer.SingleOrDefault(a => a.Lang == Lang.ru);
+            var multiLangAnswerId = args.Option.MultiLangAnswer.Single(a => a.Lang == Lang.ru).Id;
+            var multiLangAnswer = args.DbContext.MultiLangAnswers.Single(mla => mla.Id == multiLangAnswerId);
             var manulsNum = int.Parse(multiLangAnswer.Text);
             manulsNum++;
             multiLangAnswer.Text = manulsNum.ToString();
+            args.DbContext.Update(multiLangAnswer);
 
             var manulWord = e.Command.CommandText;
             manulWord += UtilityFunctions.GetRussianWordEnding(manulsNum, new[] {"", "а", "ов"});
