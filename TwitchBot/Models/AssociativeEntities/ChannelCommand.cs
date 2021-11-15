@@ -44,10 +44,10 @@ namespace TwitchBot.Models.AssociativeEntities
             var globalCooldown = Command.GlobalCooldown ?? ChannelInfo.GlobalCooldown;
 
             if (LastUsage != null &&
-                DateTime.Now - LastUsage < TimeSpan.FromSeconds(globalCooldown))
+                DateTime.Now.ToUniversalTime() - LastUsage < TimeSpan.FromSeconds(globalCooldown))
                 return false;
         
-            LastUsage = DateTime.Now;
+            LastUsage = DateTime.Now.ToUniversalTime();
         
             return true;
         }

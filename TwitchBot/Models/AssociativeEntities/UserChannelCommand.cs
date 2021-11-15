@@ -41,7 +41,7 @@ namespace TwitchBot.Models.AssociativeEntities
         public bool IsAvailable()
         {
             var userCooldown = ChannelCommand.Command.UserCooldown ?? ChannelCommand.ChannelInfo.UserCooldown;
-            if (DateTime.Now - LastUsage < TimeSpan.FromSeconds(userCooldown))
+            if (DateTime.Now.ToUniversalTime() - LastUsage < TimeSpan.FromSeconds(userCooldown))
                 return false;
             return true;
         }

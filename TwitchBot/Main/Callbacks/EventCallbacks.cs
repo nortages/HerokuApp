@@ -198,7 +198,7 @@ namespace TwitchBot.Main.Callbacks
                 
                 answer = command.GetAnswer(e, commandCallbackArgs);
                 
-                userChannelCommand.LastUsage = DateTime.Now;
+                userChannelCommand.LastUsage = DateTime.Now.ToUniversalTime();
                 userChannelCommand.Amount++;
                 channelCommand.UserChannelCommands.Add(userChannelCommand);
                 args.DbContext.Update(userChannelCommand);
