@@ -1,16 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TwitchBot.Main.Enums;
 
 #nullable disable
 
 namespace TwitchBot.Models
 {
-    public enum Lang
-    {
-        ru,
-        ua
-    }
-
     [Table("multilang_answer")]
     public class MultiLangAnswer
     {

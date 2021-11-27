@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using TwitchBot.Main.Enums;
 using TwitchBot.Models;
 using TwitchBot.Models.AssociativeEntities;
 

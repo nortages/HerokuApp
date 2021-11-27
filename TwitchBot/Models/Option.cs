@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using Fasterflect;
 using TwitchBot.Main;
+using TwitchBot.Main.Enums;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchLib.Client.Events;
 

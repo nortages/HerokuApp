@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using TwitchBot.Main.Enums;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchBot.Main.Hearthstone;
 using TwitchBot.Models;

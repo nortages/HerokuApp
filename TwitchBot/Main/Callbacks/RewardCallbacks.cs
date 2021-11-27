@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TwitchBot.Main.Enums;
 using TwitchBot.Models;
 using TwitchLib.PubSub.Events;
 
