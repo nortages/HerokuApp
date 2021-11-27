@@ -54,6 +54,7 @@ namespace TwitchBot.Main
             BotUsername = GetSecret("BOT_USERNAME");
             BotUserId = GetSecret("BOT_USER_ID");
             BotClientId = GetSecret("BOT_CLIENT_ID");
+            BotClientSecret = GetSecret("BOT_CLIENT_SECRET");
             BattleNetClientId = GetSecret("BATTLE_NET_CLIENT_ID");
             BattleNetSecret = GetSecret("BATTLE_NET_SECRET");
         }
@@ -66,6 +67,7 @@ namespace TwitchBot.Main
         public static string BotUsername { get; set; }
         public static string BotUserId { get; set; }
         public static string BotClientId { get; set; }
+        public static string BotClientSecret { get; set; }
         public static string BattleNetClientId { get; set; }
         public static string BattleNetSecret { get; set; }
         public static HearthstoneApiClient HearthstoneApiClient { get; private set; }
@@ -453,21 +455,34 @@ namespace TwitchBot.Main
 
         private static void RefreshAccessTokens(NortagesTwitchBotDbContext dbDbContextCredentials)
         {
-            var client = new RestClient("https://twitchtokengenerator.com");
+            var client = new RestClient("https://id.twitch.tv");
             foreach (var credentials in dbDbContextCredentials.Credentials)
             {
                 if (credentials.RefreshToken is null || credentials.ExpirationDate - DateTime.Now > TimeSpan.FromDays(30))
                     continue;
 
-                var request = new RestRequest($"/api/refresh/{credentials.RefreshToken}");
-                var response = client.Execute(request, Method.GET);
+                var request = new RestRequest($"/oauth2/token/");
+                request.AddQueryParameter("client_id", BotClientId);
+                request.AddQueryParameter("client_secret", BotClientSecret);
+
+                var scopes = new List<string>();
+                foreach (var scope in credentials.Scopes.Select(scope => scope.ToString()))
+                {
+                    var splitScope =  Regex.Split(scope, @"(?<!^)(?=[A-Z])");
+                    var formattedScope = string.Join("_", splitScope.Select(scopePart => scopePart.ToLower()));
+                    scopes.Add(formattedScope);
+                }
+                request.AddQueryParameter("scope", string.Join(" ", scopes));
+                
+                var response = client.Execute(request, Method.POST);
                 var jObjectResponse = JObject.Parse(response.Content);
                 if (!jObjectResponse.Value<bool>("success"))
                     continue;
 
-                var newAccessToken = jObjectResponse.Value<string>("token");
+                var newAccessToken = jObjectResponse.Value<string>("access_token");
+                var expiresInSeconds = jObjectResponse.Value<int>("expires_in");
                 credentials.AccessToken = newAccessToken;
-                credentials.ExpirationDate = DateTime.Now + TimeSpan.FromDays(60);
+                credentials.ExpirationDate = DateTime.Now + TimeSpan.FromSeconds(expiresInSeconds);
 
                 dbDbContextCredentials.Update(credentials);
             }

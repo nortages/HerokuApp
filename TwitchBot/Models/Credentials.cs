@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TwitchBot.Main.Enums;
 
 #nullable disable
 
@@ -20,5 +22,8 @@ namespace TwitchBot.Models
 
         [Column("expiration_date")] 
         public DateTime? ExpirationDate { get; set; }
+        
+        [Column("scopes")] 
+        public Scope[] Scopes { get; set; }
     }
 }

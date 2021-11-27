@@ -18,6 +18,7 @@ namespace TwitchBot
         static NortagesTwitchBotDbContext()
         {
             NpgsqlConnection.GlobalTypeMapper.MapEnum<Lang>("Language");
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<Scope>("Scope");
         }
 
         public NortagesTwitchBotDbContext()
