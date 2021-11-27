@@ -466,6 +466,7 @@ namespace TwitchBot.Main
                 var request = new RestRequest($"/oauth2/token/");
                 request.AddQueryParameter("client_id", BotClientId);
                 request.AddQueryParameter("client_secret", BotClientSecret);
+                request.AddQueryParameter("grant_type", "client_credentials");
 
                 var scopes = new List<string>();
                 var scopeEnumType = typeof(Scope);
@@ -484,8 +485,6 @@ namespace TwitchBot.Main
                 
                 var response = client.Execute(request, Method.POST);
                 var jObjectResponse = JObject.Parse(response.Content);
-                if (!jObjectResponse.Value<bool>("success"))
-                    continue;
 
                 var newAccessToken = jObjectResponse.Value<string>("access_token");
                 var expiresInSeconds = jObjectResponse.Value<int>("expires_in");
