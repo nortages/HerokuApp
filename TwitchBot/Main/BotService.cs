@@ -12,9 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using NpgsqlTypes;
 using RestSharp;
 using TwitchBot.Main.Callbacks;
 using TwitchBot.Main.DonationAlerts;
+using TwitchBot.Main.Enums;
 using TwitchBot.Main.ExtensionsMethods;
 using TwitchBot.Main.Hearthstone;
 using TwitchBot.Main.Interfaces;
@@ -466,11 +468,17 @@ namespace TwitchBot.Main
                 request.AddQueryParameter("client_secret", BotClientSecret);
 
                 var scopes = new List<string>();
-                foreach (var scope in credentials.Scopes.Select(scope => scope.ToString()))
+                var scopeEnumType = typeof(Scope);
+                var pgNameAttributeType = typeof(PgNameAttribute);
+                
+                foreach (var scope in credentials.Scopes)
                 {
-                    var splitScope =  Regex.Split(scope, @"(?<!^)(?=[A-Z])");
-                    var formattedScope = string.Join("_", splitScope.Select(scopePart => scopePart.ToLower()));
-                    scopes.Add(formattedScope);
+                    var memberInfos = scopeEnumType.GetMember(scope.ToString());
+                    var enumValueMemberInfo = memberInfos.First(m => m.DeclaringType == scopeEnumType);
+                    var valueAttributes = enumValueMemberInfo.GetCustomAttributes(pgNameAttributeType, false);
+                    var pgName = ((PgNameAttribute)valueAttributes[0]).PgName;
+                    
+                    scopes.Add(pgName);
                 }
                 request.AddQueryParameter("scope", string.Join(" ", scopes));
                 
