@@ -40,6 +40,6 @@ namespace TwitchBot.Main.Enums
 		[PgName("user:read:broadcast")] UserReadBroadcast,
 		[PgName("user:read:email")] UserReadEmail,
 		[PgName("user:read:follows")] UserReadFollows,
-		[PgName("user:read:subscription")] UserReadSubscription,
+		[PgName("user:read:subscriptions")] UserReadSubscriptions,
 	}
 }
