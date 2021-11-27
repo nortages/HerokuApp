@@ -99,12 +99,7 @@
     <Compile Remove="Models\Trash\ServiceCallback.cs" />
     <Compile Remove="Models\Trash\TwitchClientInfo.cs" />
     <Compile Remove="Models\Trash\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Main\CommandsFiles\json-schema.json" />
-    <_ContentIncludedByDefault Remove="Main\CommandsFiles\manuls_easter_eggs.json" />
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     <EmbeddedResource Remove="Models\Trash\**" />
