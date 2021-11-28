@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using TwitchBot.Main;
 using TwitchBot.Main.Enums;
 using TwitchBot.Models;
 using TwitchBot.Models.AssociativeEntities;
@@ -60,10 +61,8 @@ namespace TwitchBot
             if (optionsBuilder.IsConfigured)
                 return;
             optionsBuilder.UseLazyLoadingProxies();
-            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-            connectionString = connectionString == null
-                ? Configuration["DATABASE_URL"]
-                : FormatConnectionString(connectionString);
+            var connectionString = BotService.GetSecret("DATABASE_URL");
+            connectionString = FormatConnectionString(connectionString);
             optionsBuilder.UseNpgsql(connectionString);
         }
 

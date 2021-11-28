@@ -463,7 +463,7 @@ namespace TwitchBot.Main
                 if (credentials.RefreshToken is null || credentials.ExpirationDate - DateTime.Now > TimeSpan.FromDays(30))
                     continue;
 
-                var request = new RestRequest($"/oauth2/token/");
+                var request = new RestRequest($"oauth2/token");
                 request.AddQueryParameter("client_id", BotClientId);
                 request.AddQueryParameter("client_secret", BotClientSecret);
                 request.AddQueryParameter("grant_type", "client_credentials");
@@ -497,7 +497,7 @@ namespace TwitchBot.Main
             dbDbContextCredentials.SaveChanges();
         }
 
-        private static string GetSecret(string key)
+        public static string GetSecret(string key)
         {
             return Environment.GetEnvironmentVariable(key) ?? _configuration[key];
         }
