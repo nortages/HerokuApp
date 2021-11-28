@@ -459,7 +459,7 @@ namespace TwitchBot.Main
             var client = new RestClient("https://id.twitch.tv");
             foreach (var credentials in dbDbContextCredentials.Credentials)
             {
-                if (credentials.RefreshToken is null || credentials.ExpirationDate - DateTime.Now > TimeSpan.FromDays(30))
+                if (credentials.RefreshToken is null || credentials.ExpirationDate > DateTime.Now.ToUniversalTime())
                     continue;
 
                 var request = new RestRequest($"oauth2/token");
