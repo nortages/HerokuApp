@@ -41,9 +41,13 @@ namespace TwitchBot.Main.ExtensionsMethods
         {
             var oSignalEvent = new ManualResetEvent(false);
 
-            twitchClient.OnConnected += (sender, args) => { oSignalEvent.Set(); };
+            twitchClient.OnConnected += (sender, args) =>
+            {
+                Console.WriteLine("On connected");
+                oSignalEvent.Set();
+            };
             twitchClient.Connect();
-
+    
             oSignalEvent.WaitOne();
             oSignalEvent.Reset();
         }

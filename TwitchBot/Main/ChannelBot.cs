@@ -70,7 +70,7 @@ namespace TwitchBot.Main
         public void Init(NortagesTwitchBotDbContext dbContext)
         {
             if (ChannelInfo.ChannelCredentials is {AccessToken: { } accessToken})
-                ChannelTwitchHelpers = new TwitchHelpers(BotService.BotClientId, accessToken);
+                ChannelTwitchHelpers = new TwitchHelpers(BotService.BotClientId, BotService.BotClientSecret, accessToken);
             LoadDonationAlertsClient(dbContext);
 
             foreach (var channelMiniGame in ChannelInfo.ChannelMiniGames)

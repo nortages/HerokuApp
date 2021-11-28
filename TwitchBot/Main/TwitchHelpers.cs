@@ -16,12 +16,12 @@ namespace TwitchBot.Main
 {
     public class TwitchHelpers
     {
-        public TwitchHelpers(string clientId, string accessToken)
+        public TwitchHelpers(string clientId, string clientSecret, string accessToken)
         {
             TwitchApi = new TwitchAPI();
             TwitchApi.Settings.ClientId = clientId;
             TwitchApi.Settings.AccessToken = accessToken;
-            TwitchApi.Settings.Secret = "Twitch"; // Need to not hard code this
+            TwitchApi.Settings.Secret = clientSecret;
         }
 
         public TwitchAPI TwitchApi { get; }

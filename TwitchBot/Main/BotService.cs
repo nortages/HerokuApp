@@ -90,7 +90,7 @@ namespace TwitchBot.Main
 
             RefreshAccessTokens(dbContext);
             var botAccessToken = dbContext.Credentials.Single(c => c.Id == 1).AccessToken;
-            BotTwitchHelpers = new TwitchHelpers(BotClientId, botAccessToken);
+            BotTwitchHelpers = new TwitchHelpers(BotClientId, BotClientSecret, botAccessToken);
 
             var channelBotInfos = await LoadChannelInfos(dbContext, cancellationToken: cancellationToken);
             
@@ -385,18 +385,17 @@ namespace TwitchBot.Main
 
             BotTwitchClient.OnConnectionError += (_, e) =>
             {
-                if (e == null) throw new ArgumentNullException(nameof(e));
+                if (e == null) 
+                    throw new ArgumentNullException(nameof(e));
+                
                 TwitchClientLog(LogLevel.Error, e.Error.Message);
             };
             BotTwitchClient.OnNoPermissionError += (_, _) => TwitchClientLog(LogLevel.Warning, "No permission.");
-            BotTwitchClient.OnJoinedChannel += (_, _) =>
-            {
-                TwitchClientLog(LogLevel.Information, "Joined to the channel.");
-            };
+            BotTwitchClient.OnJoinedChannel += (_, _) => TwitchClientLog(LogLevel.Information, "Joined to the channel.");
             BotTwitchClient.OnDisconnected += (_, _) => TwitchClientLog(LogLevel.Warning, "Disconnected.");
-            BotTwitchClient.OnError += (_, e) =>
-                TwitchClientLog(LogLevel.Error, $"{e.Exception.Message}\n{e.Exception.StackTrace}");
+            BotTwitchClient.OnError += (_, e) => TwitchClientLog(LogLevel.Error, $"{e.Exception.Message}\n{e.Exception.StackTrace}");
             BotTwitchClient.OnConnected += (_, _) => { TwitchClientLog(LogLevel.Information, "Connected."); };
+            BotTwitchClient.OnIncorrectLogin += (sender, args) => TwitchClientLog(LogLevel.Error, args.ToString());
 
             BotTwitchClient.FullConnect();
 
@@ -464,24 +463,10 @@ namespace TwitchBot.Main
                     continue;
 
                 var request = new RestRequest($"oauth2/token");
-                request.AddQueryParameter("client_id", BotClientId);
-                request.AddQueryParameter("client_secret", BotClientSecret);
-                request.AddQueryParameter("grant_type", "client_credentials");
-
-                var scopes = new List<string>();
-                var scopeEnumType = typeof(Scope);
-                var pgNameAttributeType = typeof(PgNameAttribute);
-                
-                foreach (var scope in credentials.Scopes)
-                {
-                    var memberInfos = scopeEnumType.GetMember(scope.ToString());
-                    var enumValueMemberInfo = memberInfos.First(m => m.DeclaringType == scopeEnumType);
-                    var valueAttributes = enumValueMemberInfo.GetCustomAttributes(pgNameAttributeType, false);
-                    var pgName = ((PgNameAttribute)valueAttributes[0]).PgName;
-                    
-                    scopes.Add(pgName);
-                }
-                request.AddQueryParameter("scope", string.Join(" ", scopes));
+                request.AddParameter("client_id", BotClientId, ParameterType.GetOrPost);
+                request.AddParameter("client_secret", BotClientSecret, ParameterType.GetOrPost);
+                request.AddParameter("refresh_token", credentials.RefreshToken, ParameterType.GetOrPost);
+                request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
                 
                 var response = client.Execute(request, Method.POST);
                 var jObjectResponse = JObject.Parse(response.Content);
@@ -489,7 +474,7 @@ namespace TwitchBot.Main
                 var newAccessToken = jObjectResponse.Value<string>("access_token");
                 var expiresInSeconds = jObjectResponse.Value<int>("expires_in");
                 credentials.AccessToken = newAccessToken;
-                credentials.ExpirationDate = DateTime.Now + TimeSpan.FromSeconds(expiresInSeconds);
+                credentials.ExpirationDate = DateTime.Now.ToUniversalTime() + TimeSpan.FromSeconds(expiresInSeconds);
 
                 dbDbContextCredentials.Update(credentials);
             }
